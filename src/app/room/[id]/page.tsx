@@ -15,14 +15,14 @@ import {
   ImageIcon,
   File,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Textarea } from "@/components/ui/textarea"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/src/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { Badge } from "@/src/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/src/components/ui/avatar"
+import { Textarea } from "@/src/components/ui/textarea"
+import { ScrollArea } from "@/src/components/ui/scroll-area"
+import { Input } from "@/src/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
 
 // Mock room data
 const mockRoomData = {

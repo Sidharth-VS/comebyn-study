@@ -1,12 +1,22 @@
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
+import { redirect } from "next/navigation"
+import { headers } from "next/headers"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { cn } from "@/src/lib/utils"
 import { LoginForm } from "./sign-in-form"
 import { SiteLogo } from "@/src/components/ui/site-logo"
+import { auth } from "@/src/lib/auth"
 
-export default function Page() {
+const Page = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  
+  if(!!session){
+    redirect('/');
+  }
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-sky-50">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
@@ -52,3 +62,5 @@ export default function Page() {
     </main>
   )
 }
+
+export default Page;
