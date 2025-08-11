@@ -131,7 +131,20 @@ const HomeView = () => {
               </div>
               <h1 className="text-2xl font-bold text-gray-900">StudyRooms</h1>
             </div>
-            <Button>Create Study Room</Button>
+            <div className="flex items-center gap-2">
+              <Button>Create Study Room</Button>
+              <Button
+                onClick={() =>
+                  authClient.signOut({
+                    fetchOptions: {
+                      onSuccess: () => router.push("/sign-in"),
+                    },
+                  })
+                }
+              >
+                Sign out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -255,13 +268,6 @@ const HomeView = () => {
           </div>
         )}
       </main>
-      <Button onClick={() => authClient.signOut({
-        fetchOptions: {
-            onSuccess: () => router.push('/sign-in')
-        }
-      })}>
-        Sign out
-      </Button>
     </div>
   )
 }
