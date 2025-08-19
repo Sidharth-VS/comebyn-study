@@ -137,6 +137,7 @@ export default function RoomPage() {
   const router = useRouter()
   const roomId = params.id as string
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [newMessage, setNewMessage] = useState("")
   const [messages, setMessages] = useState(mockMessages)
@@ -181,8 +182,21 @@ export default function RoomPage() {
     }
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        alert("Please upload a PDF file");
+        return;
+      }
+      console.log("Selected PDF:", file);
+      // TODO: send file to backend (API route / storage service)
+    }
+  }
+
   const handleFileUpload = () => {
     // Simulate file upload
+    fileInputRef.current?.click();
     const fileMessage = {
       id: Date.now().toString(),
       user: "System",
@@ -310,6 +324,13 @@ export default function RoomPage() {
                 {/* Message Input */}
                 <div className="border-t p-4 flex-shrink-0">
                   <div className="flex space-x-2">
+                    <input 
+                      type="file" 
+                      className="hidden"
+                      ref={fileInputRef}
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                    />
                     <Button variant="outline" size="sm" onClick={handleFileUpload}>
                       <Upload className="w-4 h-4" />
                     </Button>
