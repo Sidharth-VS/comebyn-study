@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { useState, useMemo } from "react"
 import { Search, Users, BookOpen, Upload, MessageSquare } from "lucide-react"
 import { Input } from "@/src/components/ui/input"
@@ -132,18 +133,28 @@ const HomeView = () => {
               <h1 className="text-2xl font-bold text-gray-900">StudyRooms</h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button>Create Study Room</Button>
-              <Button
-                onClick={() =>
-                  authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => router.push("/sign-in"),
-                    },
-                  })
-                }
+              <motion.div
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.99 }}
               >
-                Sign out
-              </Button>
+                <Button>Create Study Room</Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <Button
+                  onClick={() =>
+                    authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => router.push("/sign-in"),
+                      },
+                    })
+                  }
+                >
+                  Sign out
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>
