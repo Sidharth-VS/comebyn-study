@@ -24,7 +24,7 @@ const Page = async () => {
         <header className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SiteLogo />
-            <span className="text-xl font-semibold tracking-tight">StudyRooms</span>
+            <span className="text-xl font-semibold tracking-tight">ComeByN Study</span>
           </div>
           <Link
             href="/"

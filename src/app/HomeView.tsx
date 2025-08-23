@@ -130,7 +130,7 @@ const HomeView = () => {
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">StudyRooms</h1>
+              <h1 className="text-2xl font-bold text-gray-900">ComeByN Study</h1>
             </div>
             <div className="flex items-center gap-2">
               <motion.div

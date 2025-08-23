@@ -45,7 +45,7 @@ export const LoginForm = () => {
     setError(null);
     setPending(true);
 
-    authClient.signIn.email(
+    await authClient.signIn.email(
       {
         email: data.email,
         password: data.password,

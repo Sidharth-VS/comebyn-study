@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
@@ -14,6 +16,8 @@ import {
   FileText,
   ImageIcon,
   File,
+  Check,
+  X,
 } from "lucide-react"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
@@ -56,46 +60,6 @@ const mockParticipants = [
   { id: "6", name: "Frank Miller", status: "offline", role: "member" },
 ]
 
-// Mock chat messages
-const mockMessages = [
-  {
-    id: "1",
-    user: "Alice Johnson",
-    message: "Hey everyone! I've uploaded the calculus notes from today's lecture.",
-    timestamp: "2:30 PM",
-    type: "message",
-  },
-  {
-    id: "2",
-    user: "Bob Smith",
-    message: "Thanks Alice! I was struggling with the derivative problems.",
-    timestamp: "2:32 PM",
-    type: "message",
-  },
-  {
-    id: "3",
-    user: "Carol Davis",
-    message: "I've shared a PDF with practice problems. Check the files section!",
-    timestamp: "2:35 PM",
-    type: "message",
-  },
-  {
-    id: "4",
-    user: "System",
-    message: "David Wilson uploaded: Integration_Techniques.pdf",
-    timestamp: "2:40 PM",
-    type: "file",
-    fileName: "Integration_Techniques.pdf",
-  },
-  {
-    id: "5",
-    user: "Eva Brown",
-    message: "Can someone help me with problem 15 from the homework?",
-    timestamp: "2:45 PM",
-    type: "message",
-  },
-]
-
 // Mock files
 const mockFiles = [
   {
@@ -132,21 +96,56 @@ const mockFiles = [
   },
 ]
 
+// Mock messages
+const mockMessages: Message[] = [
+  {
+    id: "1",
+    user: "Alice Johnson",
+    message: "Hello everyone!",
+    timestamp: "10:00 AM",
+    type: "message",
+  },
+  {
+    id: "2",
+    user: "Bob Smith",
+    message: "Anyone working on chapter 3?",
+    timestamp: "10:05 AM",
+    type: "message",
+  },
+]
+
+type Message = {
+  id: string
+  user: string
+  message: string
+  timestamp: string
+  type: "message" | "file"
+  fileName?: string
+  uploadStatus?: "uploading" | "success" | "error"
+}
+
 export default function RoomPage() {
   const params = useParams()
   const router = useRouter()
   const roomId = params.id as string
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
   const [newMessage, setNewMessage] = useState("")
-  const [messages, setMessages] = useState(mockMessages)
+  const [messages, setMessages] = useState<Message[]>(mockMessages)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [files, setFiles] = useState(mockFiles)
 
   const room = mockRoomData[roomId as keyof typeof mockRoomData]
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    const scrollArea = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement
+    if (scrollArea) {
+      scrollArea.scrollTop = scrollArea.scrollHeight
+    }
   }
 
   useEffect(() => {
@@ -170,12 +169,12 @@ export default function RoomPage() {
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
-      const message = {
+      const message: Message = {
         id: Date.now().toString(),
         user: "You",
         message: newMessage,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        type: "message" as const,
+        type: "message",
       }
       setMessages([...messages, message])
       setNewMessage("")
@@ -183,29 +182,78 @@ export default function RoomPage() {
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type !== "application/pdf") {
-        alert("Please upload a PDF file");
-        return;
-      }
-      console.log("Selected PDF:", file);
-      // TODO: send file to backend (API route / storage service)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== "application/pdf") {
+      alert("Please upload a PDF file")
+      return
     }
+
+    setSelectedFile(file)
   }
 
-  const handleFileUpload = () => {
-    // Simulate file upload
-    fileInputRef.current?.click();
-    const fileMessage = {
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      fileInputRef.current?.click()
+      return
+    }
+
+    setIsUploading(true)
+
+    const fileMessage: Message = {
       id: Date.now().toString(),
       user: "System",
-      message: "You uploaded: Sample_Document.pdf",
+      message: `You uploaded: ${selectedFile.name}`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      type: "file" as const,
-      fileName: "Sample_Document.pdf",
+      type: "file",
+      fileName: selectedFile.name,
+      uploadStatus: "uploading",
     }
-    setMessages([...messages, fileMessage])
+    setMessages((prev) => [...prev, fileMessage])
+
+    const formData = new FormData()
+    const action = "summarize"
+    formData.append("file", selectedFile)
+    formData.append("action", action)
+
+    try {
+      const res = await fetch("/api/pdf", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        throw new Error(`Server ${res.status}: ${errorText}`)
+      }
+
+      const data = await res.json()
+      console.log("✅ PDF processed:", data)
+
+      setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "success" } : msg)))
+
+      const newFile = {
+        id: Date.now().toString(),
+        name: selectedFile.name,
+        type: "pdf",
+        size: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
+        uploadedBy: "You",
+        uploadedAt: "Just now",
+      }
+      setFiles((prev) => [newFile, ...prev])
+    } catch (err) {
+      console.error("❌ Upload failed:", err)
+
+      setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "error" } : msg)))
+    } finally {
+      setIsUploading(false)
+      setSelectedFile(null)
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
   }
 
   const getFileIcon = (type: string) => {
@@ -257,7 +305,7 @@ export default function RoomPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
-            <Card className="h-[700px] flex flex-col">
+            <Card className="h-[calc(110vh-200px)] flex flex-col">
               <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center space-x-2">
@@ -280,59 +328,90 @@ export default function RoomPage() {
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 flex flex-col p-0">
+              <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
                 {/* Messages Area */}
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
-                    {filteredMessages.map((msg) => (
-                      <div key={msg.id} className="flex space-x-3">
-                        <Avatar className="w-8 h-8 flex-shrink-0">
-                          <AvatarFallback className="text-xs">
-                            {msg.user === "System"
-                              ? "S"
-                              : msg.user
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-sm font-medium text-gray-900">{msg.user}</span>
-                            <span className="text-xs text-gray-500">{msg.timestamp}</span>
-                          </div>
-                          <div className={`text-sm ${msg.type === "file" ? "bg-blue-50 p-2 rounded border" : ""}`}>
-                            {msg.type === "file" ? (
-                              <div className="flex items-center space-x-2">
-                                {getFileIcon("pdf")}
-                                <span className="text-blue-600">{msg.fileName}</span>
-                                <Button variant="ghost" size="sm">
-                                  <Download className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            ) : (
-                              <p className="text-gray-700">{msg.message}</p>
-                            )}
+                <div className="flex-1 overflow-hidden">
+                  <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
+                    <div className="space-y-4">
+                      {filteredMessages.map((msg) => (
+                        <div key={msg.id} className="flex space-x-3">
+                          <Avatar className="w-8 h-8 flex-shrink-0">
+                            <AvatarFallback className="text-xs">
+                              {msg.user === "System"
+                                ? "S"
+                                : msg.user
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium text-gray-900">{msg.user}</span>
+                              <span className="text-xs text-gray-500">{msg.timestamp}</span>
+                            </div>
+                            <div className={`text-sm ${msg.type === "file" ? "bg-blue-50 p-2 rounded border" : ""}`}>
+                              {msg.type === "file" ? (
+                                <div className="flex items-center space-x-2">
+                                  {getFileIcon("pdf")}
+                                  <span className="text-blue-600">{msg.fileName}</span>
+                                  {msg.uploadStatus === "success" && <Check className="w-4 h-4 text-green-500" />}
+                                  {msg.uploadStatus === "error" && <X className="w-4 h-4 text-red-500" />}
+                                  {msg.uploadStatus === "uploading" && (
+                                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                  )}
+                                  <Button variant="ghost" size="sm">
+                                    <Download className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <p className="text-gray-700">{msg.message}</p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+                </div>
 
                 {/* Message Input */}
                 <div className="border-t p-4 flex-shrink-0">
+                  {selectedFile && (
+                    <div className="mb-2 p-2 bg-blue-50 rounded border flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm text-blue-700">{selectedFile.name}</span>
+                        <span className="text-xs text-gray-500">
+                          ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedFile(null)
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = ""
+                          }
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
                   <div className="flex space-x-2">
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       className="hidden"
                       ref={fileInputRef}
                       accept="application/pdf"
                       onChange={handleFileChange}
                     />
-                    <Button variant="outline" size="sm" onClick={handleFileUpload}>
+                    <Button variant="outline" size="sm" onClick={handleFileUpload} disabled={isUploading}>
                       <Upload className="w-4 h-4" />
+                      {selectedFile ? (isUploading ? "Uploading..." : "Upload") : ""}
                     </Button>
                     <Textarea
                       placeholder="Type your message..."
@@ -418,7 +497,7 @@ export default function RoomPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center justify-between">
-                      <span>Shared Files ({mockFiles.length})</span>
+                      <span>Shared Files ({files.length})</span>
                       <Button variant="outline" size="sm" onClick={handleFileUpload}>
                         <Upload className="w-4 h-4" />
                       </Button>
@@ -427,7 +506,7 @@ export default function RoomPage() {
                   <CardContent>
                     <ScrollArea className="h-64">
                       <div className="space-y-3">
-                        {mockFiles.map((file) => (
+                        {files.map((file) => (
                           <div key={file.id} className="flex items-start space-x-3 p-2 rounded border">
                             <div className="flex-shrink-0 mt-1">{getFileIcon(file.type)}</div>
                             <div className="flex-1 min-w-0">
