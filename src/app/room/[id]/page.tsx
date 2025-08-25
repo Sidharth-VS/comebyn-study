@@ -231,7 +231,7 @@ export default function RoomPage() {
         throw new Error(`Server ${res.status}: ${errorText}`)
       }*/
      
-      console.log("✅ PDF processed:");
+      console.log("✅ PDF processed:", res);
 
       setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "success" } : msg)))
 
