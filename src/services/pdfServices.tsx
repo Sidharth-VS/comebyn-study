@@ -21,10 +21,8 @@ export const uploadPdf = async (room_id: string, file_name: string, selectedFile
     const res = await fetch(url, {
       method: "PUT",
       body: selectedFile,
-      headers: {
-        "Content-Type": "application/pdf",
-      },
     });
+    console.log(res);
 
     if (!res.ok) {
       throw new Error(`S3 upload failed: ${res.status}`);
