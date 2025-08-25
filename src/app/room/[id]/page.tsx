@@ -27,6 +27,7 @@ import { Textarea } from "@/src/components/ui/textarea"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
+import { uploadPdf } from "@/src/services/pdfServices"
 
 // Mock room data
 const mockRoomData = {
@@ -218,7 +219,9 @@ export default function RoomPage() {
     formData.append("action", action)
 
     try {
-      const res = await fetch("/api/pdf", {
+      const res = await uploadPdf(roomId, selectedFile.name, selectedFile);
+
+      /*const res = await fetch("/api/pdf", {
         method: "POST",
         body: formData,
       })
@@ -226,10 +229,9 @@ export default function RoomPage() {
       if (!res.ok) {
         const errorText = await res.text()
         throw new Error(`Server ${res.status}: ${errorText}`)
-      }
-
-      const data = await res.json()
-      console.log("✅ PDF processed:", data)
+      }*/
+     
+      console.log("✅ PDF processed:", res);
 
       setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "success" } : msg)))
 
@@ -242,11 +244,13 @@ export default function RoomPage() {
         uploadedAt: "Just now",
       }
       setFiles((prev) => [newFile, ...prev])
-    } catch (err) {
+    } 
+    catch (err) {
       console.error("❌ Upload failed:", err)
 
       setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "error" } : msg)))
-    } finally {
+    } 
+    finally {
       setIsUploading(false)
       setSelectedFile(null)
 
