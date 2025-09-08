@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { authClient } from "@/src/lib/auth-client"
+import { getToken } from "../services/tokenServices"
 
 /**
  * WebSocket message types from backend
@@ -120,45 +121,10 @@ export function useChatClient(roomId: string) {
   /**
    * Get authentication token from auth client
    */
-  const getAuthToken = useCallback(async (): Promise<string | null> => {
-    if (!isClient) {
-      return generateDevToken("dev-user-123", "Development User")
-    }
-
-    try {
-      const session = await authClient.getSession()
-      console.log("Better Auth session:", session)
-      
-      if (session?.data?.user) {
-        // Try multiple token storage locations
-        const token = 
-          localStorage.getItem("bearer_token") ||
-          localStorage.getItem("auth-token") ||
-          session.data.token ||
-          session.data.accessToken
+  const getAuthToken = useCallback(async (): Promise<string> => {
+    const token = await getToken()
         
-        if (token) {
-          console.log("Found auth token:", token.substring(0, 20) + "...")
-          return token
-        }
-        
-        // Generate a token based on the user session
-        const userId = session.data.user.id || "user-" + Date.now()
-        const username = session.data.user.name || session.data.user.email || "User"
-        const devToken = generateDevToken(userId, username)
-        console.log("Generated dev token for user:", username)
-        return devToken
-      }
-      
-      // No session, create a guest token
-      const guestToken = generateDevToken("guest-" + Date.now(), "Guest User")
-      console.log("No session found, using guest token")
-      return guestToken
-    } catch (error) {
-      console.error("Failed to get auth token:", error)
-      // For development, return a mock token
-      return generateDevToken("error-user-123", "Error User")
-    }
+    return token
   }, [isClient, generateDevToken])
 
   /**
