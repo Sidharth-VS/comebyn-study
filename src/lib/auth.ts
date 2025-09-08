@@ -6,6 +6,7 @@ import { db } from "@/src/db"; // your drizzle instance
 import * as schema from "@/src/db/schema"
  
 export const auth = betterAuth({
+    secret: process.env.BETTER_AUTH_SECRET || "your-super-secret-jwt-key-change-this-in-production",
     plugins: [
         jwt(),
         bearer(),

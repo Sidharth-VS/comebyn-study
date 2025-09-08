@@ -102,15 +102,33 @@ export function useChatClient(roomId: string) {
   }, [])
 
   /**
+   * Generate a JWT token for development/testing
+   */
+  const generateDevToken = useCallback((userId: string, username: string): string => {
+    // Simple JWT-like token for development
+    const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }))
+    const payload = btoa(JSON.stringify({
+      sub: userId,
+      name: username,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour
+    }))
+    const signature = btoa("dev-signature")
+    return `${header}.${payload}.${signature}`
+  }, [])
+
+  /**
    * Get authentication token from auth client
    */
   const getAuthToken = useCallback(async (): Promise<string | null> => {
     if (!isClient) {
-      return "mock-token-for-development"
+      return generateDevToken("dev-user-123", "Development User")
     }
 
     try {
       const session = await authClient.getSession()
+      console.log("Better Auth session:", session)
+      
       if (session?.data?.user) {
         // Try multiple token storage locations
         const token = 
@@ -120,20 +138,28 @@ export function useChatClient(roomId: string) {
           session.data.accessToken
         
         if (token) {
+          console.log("Found auth token:", token.substring(0, 20) + "...")
           return token
         }
         
-        // If no token found, create a mock token for development
-        console.warn("No auth token found, using mock token for development")
-        return "mock-token-for-development"
+        // Generate a token based on the user session
+        const userId = session.data.user.id || "user-" + Date.now()
+        const username = session.data.user.name || session.data.user.email || "User"
+        const devToken = generateDevToken(userId, username)
+        console.log("Generated dev token for user:", username)
+        return devToken
       }
-      return null
+      
+      // No session, create a guest token
+      const guestToken = generateDevToken("guest-" + Date.now(), "Guest User")
+      console.log("No session found, using guest token")
+      return guestToken
     } catch (error) {
       console.error("Failed to get auth token:", error)
       // For development, return a mock token
-      return "mock-token-for-development"
+      return generateDevToken("error-user-123", "Error User")
     }
-  }, [isClient])
+  }, [isClient, generateDevToken])
 
   /**
    * Connect to WebSocket chat
