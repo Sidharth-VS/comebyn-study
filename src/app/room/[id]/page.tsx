@@ -28,6 +28,8 @@ import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
 import { uploadPdf } from "@/src/services/pdfServices"
+import { Chat, ChatParticipants } from "@/src/components/chat"
+import { useChatClient } from "@/src/hooks/use-chat-client"
 
 // Mock room data
 const mockRoomData = {
@@ -97,30 +99,13 @@ const mockFiles = [
   },
 ]
 
-// Mock messages
-const mockMessages: Message[] = [
-  {
-    id: "1",
-    user: "Alice Johnson",
-    message: "Hello everyone!",
-    timestamp: "10:00 AM",
-    type: "message",
-  },
-  {
-    id: "2",
-    user: "Bob Smith",
-    message: "Anyone working on chapter 3?",
-    timestamp: "10:05 AM",
-    type: "message",
-  },
-]
-
-type Message = {
+// File upload message type
+type FileMessage = {
   id: string
   user: string
   message: string
   timestamp: string
-  type: "message" | "file"
+  type: "file"
   fileName?: string
   uploadStatus?: "uploading" | "success" | "error"
 }
@@ -129,29 +114,18 @@ export default function RoomPage() {
   const params = useParams()
   const router = useRouter()
   const roomId = params.id as string
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
 
-  const [newMessage, setNewMessage] = useState("")
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [files, setFiles] = useState(mockFiles)
+  const [fileMessages, setFileMessages] = useState<FileMessage[]>([])
+
+  // Use the real chat hook (client-side only)
+  const { participants, memberCount, isClient } = useChatClient(roomId)
 
   const room = mockRoomData[roomId as keyof typeof mockRoomData]
-
-  const scrollToBottom = () => {
-    const scrollArea = scrollAreaRef.current?.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement
-    if (scrollArea) {
-      scrollArea.scrollTop = scrollArea.scrollHeight
-    }
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   if (!room) {
     return (
@@ -168,19 +142,7 @@ export default function RoomPage() {
     )
   }
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message: Message = {
-        id: Date.now().toString(),
-        user: "You",
-        message: newMessage,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        type: "message",
-      }
-      setMessages([...messages, message])
-      setNewMessage("")
-    }
-  }
+  // File upload handling remains the same
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -202,7 +164,7 @@ export default function RoomPage() {
 
     setIsUploading(true)
 
-    const fileMessage: Message = {
+    const fileMessage: FileMessage = {
       id: Date.now().toString(),
       user: "System",
       message: `You uploaded: ${selectedFile.name}`,
@@ -211,7 +173,7 @@ export default function RoomPage() {
       fileName: selectedFile.name,
       uploadStatus: "uploading",
     }
-    setMessages((prev) => [...prev, fileMessage])
+    setFileMessages((prev) => [...prev, fileMessage])
 
     const formData = new FormData()
     const action = "summarize"
@@ -233,7 +195,7 @@ export default function RoomPage() {
      
       console.log("✅ PDF processed:", res);
 
-      setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "success" } : msg)))
+      setFileMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "success" } : msg)))
 
       const newFile = {
         id: Date.now().toString(),
@@ -248,7 +210,7 @@ export default function RoomPage() {
     catch (err) {
       console.error("❌ Upload failed:", err)
 
-      setMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "error" } : msg)))
+      setFileMessages((prev) => prev.map((msg) => (msg.id === fileMessage.id ? { ...msg, uploadStatus: "error" } : msg)))
     } 
     finally {
       setIsUploading(false)
@@ -271,7 +233,7 @@ export default function RoomPage() {
     }
   }
 
-  const filteredMessages = messages.filter(
+  const filteredFileMessages = fileMessages.filter(
     (msg) =>
       msg.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
       msg.user.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -298,7 +260,7 @@ export default function RoomPage() {
               <Badge variant="outline">{room.subject}</Badge>
               <div className="flex items-center space-x-1 text-sm text-green-600">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span>{room.participants} students online</span>
+                <span>{memberCount} students online</span>
               </div>
             </div>
           </div>
@@ -333,54 +295,42 @@ export default function RoomPage() {
               </CardHeader>
 
               <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                {/* Messages Area */}
-                <div className="flex-1 overflow-hidden">
-                  <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-                    <div className="space-y-4">
-                      {filteredMessages.map((msg) => (
-                        <div key={msg.id} className="flex space-x-3">
-                          <Avatar className="w-8 h-8 flex-shrink-0">
-                            <AvatarFallback className="text-xs">
-                              {msg.user === "System"
-                                ? "S"
-                                : msg.user
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                {/* File Upload Messages */}
+                {filteredFileMessages.length > 0 && (
+                  <div className="border-b p-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">File Uploads</h4>
+                    <div className="space-y-2">
+                      {filteredFileMessages.map((msg) => (
+                        <div key={msg.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded border">
+                          <div className="flex-shrink-0">
+                            {getFileIcon("pdf")}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-900">{msg.user}</span>
-                              <span className="text-xs text-gray-500">{msg.timestamp}</span>
-                            </div>
-                            <div className={`text-sm ${msg.type === "file" ? "bg-blue-50 p-2 rounded border" : ""}`}>
-                              {msg.type === "file" ? (
-                                <div className="flex items-center space-x-2">
-                                  {getFileIcon("pdf")}
-                                  <span className="text-blue-600">{msg.fileName}</span>
-                                  {msg.uploadStatus === "success" && <Check className="w-4 h-4 text-green-500" />}
-                                  {msg.uploadStatus === "error" && <X className="w-4 h-4 text-red-500" />}
-                                  {msg.uploadStatus === "uploading" && (
-                                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                                  )}
-                                  <Button variant="ghost" size="sm">
-                                    <Download className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <p className="text-gray-700">{msg.message}</p>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm font-medium text-blue-700">{msg.fileName}</span>
+                              {msg.uploadStatus === "success" && <Check className="w-4 h-4 text-green-500" />}
+                              {msg.uploadStatus === "error" && <X className="w-4 h-4 text-red-500" />}
+                              {msg.uploadStatus === "uploading" && (
+                                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                               )}
                             </div>
+                            <p className="text-xs text-gray-600">{msg.user} • {msg.timestamp}</p>
                           </div>
+                          <Button variant="ghost" size="sm">
+                            <Download className="w-3 h-3" />
+                          </Button>
                         </div>
                       ))}
-                      <div ref={messagesEndRef} />
                     </div>
-                  </ScrollArea>
+                  </div>
+                )}
+
+                {/* Real-time Chat */}
+                <div className="flex-1 overflow-hidden">
+                  <Chat roomId={roomId} className="h-full" />
                 </div>
 
-                {/* Message Input */}
+                {/* File Upload Controls */}
                 <div className="border-t p-4 flex-shrink-0">
                   {selectedFile && (
                     <div className="mb-2 p-2 bg-blue-50 rounded border flex items-center justify-between">
@@ -415,22 +365,7 @@ export default function RoomPage() {
                     />
                     <Button variant="outline" size="sm" onClick={handleFileUpload} disabled={isUploading}>
                       <Upload className="w-4 h-4" />
-                      {selectedFile ? (isUploading ? "Uploading..." : "Upload") : ""}
-                    </Button>
-                    <Textarea
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          handleSendMessage()
-                        }
-                      }}
-                    />
-                    <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                      <Send className="w-4 h-4" />
+                      {selectedFile ? (isUploading ? "Uploading..." : "Upload") : "Upload PDF"}
                     </Button>
                   </div>
                 </div>
@@ -450,48 +385,13 @@ export default function RoomPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center justify-between">
-                      <span>Participants ({mockParticipants.length})</span>
+                      <span>Participants ({participants.length})</span>
                       <Users className="w-4 h-4" />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-64">
-                      <div className="space-y-3">
-                        {mockParticipants.map((participant) => (
-                          <div key={participant.id} className="flex items-center space-x-3">
-                            <div className="relative">
-                              <Avatar className="w-8 h-8">
-                                <AvatarFallback className="text-xs">
-                                  {participant.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div
-                                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                                  participant.status === "online"
-                                    ? "bg-green-500"
-                                    : participant.status === "away"
-                                      ? "bg-yellow-500"
-                                      : "bg-gray-400"
-                                }`}
-                              ></div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{participant.name}</p>
-                              <div className="flex items-center space-x-2">
-                                <p className="text-xs text-gray-500 capitalize">{participant.status}</p>
-                                {participant.role === "moderator" && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Mod
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <ChatParticipants participants={participants} />
                     </ScrollArea>
                   </CardContent>
                 </Card>
