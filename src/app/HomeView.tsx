@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Search, Users, BookOpen, Upload, MessageSquare } from "lucide-react"
 import { Input } from "@/src/components/ui/input"
 import { Button } from "@/src/components/ui/button"
@@ -10,6 +10,23 @@ import { Badge } from "@/src/components/ui/badge"
 import Link from "next/link"
 import { authClient } from "../lib/auth-client"
 import { useRouter } from "next/navigation"
+
+import { getAllRooms } from "@/src/services/roomServices"
+
+type Room = {
+  id: string
+  name: string
+  description: string
+  participants: number
+  maxParticipants: number
+  isActive: boolean
+  category: string
+  subject: string
+  tags: string[]
+  recentActivity: string
+  filesCount: number
+  messagesCount: number
+}
 
 // Mock data for study rooms
 const mockRooms = [
@@ -99,23 +116,57 @@ const mockRooms = [
   },
 ]
 
+const normalizeRoom = (room: any): Room => ({
+  id: room.id?.toString() ?? "",
+  name: room.name ?? "Untitled Room",
+  description: room.description ?? "No description provided",
+  participants: room.participants ?? 0,
+  maxParticipants: room.maxParticipants ?? 10,
+  isActive: room.isActive ?? true,
+  category: room.category ?? "General",
+  subject: room.subject ?? "",
+  tags: Array.isArray(room.tags) ? room.tags : [],
+  recentActivity: room.recentActivity ?? "N/A",
+  filesCount: room.filesCount ?? 0,
+  messagesCount: room.messagesCount ?? 0,
+})
+
 const HomeView = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
+  const [rooms, setRooms] = useState([]);
+  
+  useEffect(() => {
+    const fun = async() => {
+      const res = await getAllRooms();
+      setRooms(res);
+    }
+    fun();
+  },[]);
+
+  useEffect(() => {
+    console.log(rooms);
+  },[rooms])
+
+  const sourceRooms = useMemo(
+    () => (rooms.length > 0 ? rooms : mockRooms).map(normalizeRoom),
+    [rooms]
+  )
+
   const filteredRooms = useMemo(() => {
-    if (!searchQuery.trim()) return mockRooms
+    if (!searchQuery.trim()) return sourceRooms
 
     const query = searchQuery.toLowerCase()
-    return mockRooms.filter(
+    return sourceRooms.filter(
       (room) =>
         room.name.toLowerCase().includes(query) ||
         room.description.toLowerCase().includes(query) ||
         room.category.toLowerCase().includes(query) ||
         room.subject.toLowerCase().includes(query) ||
-        room.tags.some((tag) => tag.toLowerCase().includes(query)),
+        room.tags.some((tag: string) => tag.toLowerCase().includes(query)),
     )
-  }, [searchQuery])
+  }, [searchQuery, sourceRooms])
 
   const activeRooms = filteredRooms.filter((room) => room.isActive)
   const inactiveRooms = filteredRooms.filter((room) => !room.isActive)
