@@ -38,3 +38,23 @@ export const createRoom = async (roomDetails: { name: string; description: strin
         return { success: false, error: (err as Error).message };
     }
 }
+
+export const getRoomById = async (id: string) => {
+  try {
+    const res = await fetch(`/api/room/get_room/${id}`, {
+      method: "GET",
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Server error: ${res.status} - ${errorText}`);
+    }
+
+    const data = await res.json();
+
+    return data;
+  } catch (err) {
+    console.error("❌ Fetching room failed", err);
+    return { success: false, error: (err as Error).message ?? "Unknown error" };
+  }
+};

@@ -18,41 +18,32 @@ import {
   File,
   Check,
   X,
+  LoaderIcon,
 } from "lucide-react"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Badge } from "@/src/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/src/components/ui/avatar"
-import { Textarea } from "@/src/components/ui/textarea"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
 import { uploadPdf } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
 import { useChatClient } from "@/src/hooks/use-chat-client"
+import { getRoomById } from "@/src/services/roomServices"
 
-// Mock room data
-const mockRoomData = {
-  "1": {
-    id: "1",
-    name: "Calculus Study Group",
-    description: "Working through calculus problems and sharing study materials",
-    participants: 12,
-    maxParticipants: 50,
-    category: "Mathematics",
-    subject: "Calculus",
-  },
-  "2": {
-    id: "2",
-    name: "Computer Science Fundamentals",
-    description: "Discussing algorithms, data structures, and programming concepts",
-    participants: 18,
-    maxParticipants: 30,
-    category: "Computer Science",
-    subject: "CS Fundamentals",
-  },
+
+type Room = {
+  id: string
+  name: string
+  description: string
+  category: string
+  subject: string
+  participants: number
+  maxParticipants: number
+  createdAt: string
+  updatedAt: string
+  // Add other room properties as needed
 }
-
 // Mock participants
 const mockParticipants = [
   { id: "1", name: "Alice Johnson", status: "online", role: "moderator" },
@@ -125,25 +116,42 @@ export const RoomView = () => {
   // Use the real chat hook (client-side only)
   const { participants, memberCount, isClient } = useChatClient(roomId)
 
-  const room = mockRoomData[roomId as keyof typeof mockRoomData]
+  const [room, setRoom] = useState<Room | null>(null)
+
+  useEffect(() => {
+    const fetchRoom = async () => {
+      const roomData = await getRoomById(roomId);
+
+      if (roomData.success) {
+        setRoom(roomData.room); // ✅ use .room
+      } else {
+        console.error("❌ Failed to fetch room:", roomData.error);
+      }
+    };
+
+    if (roomId) {
+      fetchRoom();
+    }
+  }, [roomId]);
+
 
   if (!room) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Study room not found</h1>
-          <p className="text-gray-600 mb-4">The study room you're looking for doesn't exist.</p>
-          <Button onClick={() => router.push("/")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Rooms
-          </Button>
-        </div>
+      <div className="flex flex-col items-center text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Fetching room resources
+        </h1>
+        <p className="text-gray-600 mb-4">
+          Please wait while we retrieve the study room information.
+        </p>
+        <LoaderIcon className="animate-spin h-6 w-6 text-gray-900" />
       </div>
+    </div>
     )
   }
 
   // File upload handling remains the same
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return

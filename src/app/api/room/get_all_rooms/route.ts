@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
     try {
         const backendRes = await fetch(`${process.env.BACKEND_URL}/rooms/all`, {
-        method: "GET",
+            method: "GET",
         });
 
         const data = await backendRes.json();
