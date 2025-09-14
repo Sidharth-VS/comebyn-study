@@ -36,12 +36,13 @@ export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated }: AgentForm
   const onSubmit = async (values: z.infer<typeof createRoomSchema>) => {
     setIsLoading(true)
     try {
-      const response = await createRoom({
+      const newRoom = {
         name: values.name,
+        description: values.description,
         category: values.category,
         subject: values.subject,
-        description: values.description,
-      })
+      }
+      const response = await createRoom(newRoom)
 
       if (response.success !== false) {
         toast({
@@ -49,7 +50,7 @@ export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated }: AgentForm
           description: "Study room created successfully!",
         })
         form.reset()
-        onRoomCreated?.(response.room || response)
+        onRoomCreated?.(newRoom)
         onSuccess?.()
       } else {
         throw new Error(response.error || "Failed to create room")
