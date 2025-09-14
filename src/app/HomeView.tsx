@@ -2,16 +2,16 @@
 
 import { motion } from "framer-motion"
 import { useState, useMemo, useEffect } from "react"
-import { Search, Users, BookOpen, Upload, MessageSquare } from "lucide-react"
+import { Search, Users, BookOpen, Upload, MessageSquare, Plus } from "lucide-react"
 import { Input } from "@/src/components/ui/input"
 import { Button } from "@/src/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
 import { Badge } from "@/src/components/ui/badge"
 import Link from "next/link"
-import { authClient } from "../lib/auth-client"
 import { useRouter } from "next/navigation"
-
 import { getAllRooms } from "@/src/services/roomServices"
+import { NewRoomDialog } from "@/src/modules/room/components/new-room-dialog"
+import { authClient } from "../lib/auth-client"
 
 type Room = {
   id: string
@@ -27,94 +27,6 @@ type Room = {
   filesCount: number
   messagesCount: number
 }
-
-// Mock data for study rooms
-const mockRooms = [
-  {
-    id: "1",
-    name: "Calculus Study Group",
-    description: "Working through calculus problems and sharing study materials",
-    participants: 12,
-    maxParticipants: 50,
-    isActive: true,
-    category: "Mathematics",
-    subject: "Calculus",
-    tags: ["calculus", "derivatives", "integrals", "math"],
-    recentActivity: "2 minutes ago",
-    filesCount: 8,
-    messagesCount: 156,
-  },
-  {
-    id: "2",
-    name: "Computer Science Fundamentals",
-    description: "Discussing algorithms, data structures, and programming concepts",
-    participants: 18,
-    maxParticipants: 30,
-    isActive: true,
-    category: "Computer Science",
-    subject: "CS Fundamentals",
-    tags: ["algorithms", "data-structures", "programming", "cs"],
-    recentActivity: "5 minutes ago",
-    filesCount: 15,
-    messagesCount: 243,
-  },
-  {
-    id: "3",
-    name: "Biology Lab Discussion",
-    description: "Share lab reports, discuss experiments, and study for exams",
-    participants: 9,
-    maxParticipants: 25,
-    isActive: true,
-    category: "Biology",
-    subject: "Lab Work",
-    tags: ["biology", "lab", "experiments", "reports"],
-    recentActivity: "1 hour ago",
-    filesCount: 12,
-    messagesCount: 89,
-  },
-  {
-    id: "4",
-    name: "History Essay Workshop",
-    description: "Peer review essays, share research sources, and discuss historical topics",
-    participants: 7,
-    maxParticipants: 20,
-    isActive: true,
-    category: "History",
-    subject: "Essay Writing",
-    tags: ["history", "essays", "research", "writing"],
-    recentActivity: "30 minutes ago",
-    filesCount: 6,
-    messagesCount: 67,
-  },
-  {
-    id: "5",
-    name: "Physics Problem Solving",
-    description: "Collaborative problem solving and concept clarification",
-    participants: 14,
-    maxParticipants: 35,
-    isActive: true,
-    category: "Physics",
-    subject: "Problem Solving",
-    tags: ["physics", "problems", "mechanics", "thermodynamics"],
-    recentActivity: "15 minutes ago",
-    filesCount: 10,
-    messagesCount: 198,
-  },
-  {
-    id: "6",
-    name: "Literature Analysis",
-    description: "Analyze texts, share interpretations, and discuss themes",
-    participants: 3,
-    maxParticipants: 15,
-    isActive: false,
-    category: "Literature",
-    subject: "Text Analysis",
-    tags: ["literature", "analysis", "themes", "interpretation"],
-    recentActivity: "2 days ago",
-    filesCount: 4,
-    messagesCount: 23,
-  },
-]
 
 const normalizeRoom = (room: any): Room => ({
   id: room.id?.toString() ?? "",
@@ -135,24 +47,37 @@ const HomeView = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
-  const [rooms, setRooms] = useState([]);
-  
+  const [rooms, setRooms] = useState<Room[]>([])
+  const [showForm, setShowForm] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
-    const fun = async() => {
-      const res = await getAllRooms();
-      setRooms(res);
+    const fetchRooms = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await getAllRooms()
+
+        if (res.success === false) {
+          setError(res.error || "Failed to fetch rooms")
+          setRooms([])
+        } else {
+          // Assume the API returns an array of rooms or an object with rooms array
+          const roomsData = Array.isArray(res) ? res : res.rooms || []
+          setRooms(roomsData.map(normalizeRoom))
+        }
+      } catch (err) {
+        setError("Failed to fetch rooms")
+        setRooms([])
+      } finally {
+        setLoading(false)
+      }
     }
-    fun();
-  },[]);
+    fetchRooms()
+  }, [])
 
-  useEffect(() => {
-    console.log(rooms);
-  },[rooms])
-
-  const sourceRooms = useMemo(
-    () => (rooms.length > 0 ? rooms : mockRooms).map(normalizeRoom),
-    [rooms]
-  )
+  const sourceRooms = useMemo(() => rooms, [rooms])
 
   const filteredRooms = useMemo(() => {
     if (!searchQuery.trim()) return sourceRooms
@@ -171,6 +96,15 @@ const HomeView = () => {
   const activeRooms = filteredRooms.filter((room) => room.isActive)
   const inactiveRooms = filteredRooms.filter((room) => !room.isActive)
 
+  const totalParticipants = sourceRooms.reduce((sum, room) => sum + room.participants, 0)
+  const totalFiles = sourceRooms.reduce((sum, room) => sum + room.filesCount, 0)
+  const totalMessages = sourceRooms.reduce((sum, room) => sum + room.messagesCount, 0)
+
+  const handleRoomCreated = (newRoom: any) => {
+    const normalizedRoom = normalizeRoom(newRoom)
+    setRooms((prevRooms) => [normalizedRoom, ...prevRooms])
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Header */}
@@ -184,11 +118,8 @@ const HomeView = () => {
               <h1 className="text-2xl font-bold text-gray-900">ComeByN Study</h1>
             </div>
             <div className="flex items-center gap-2">
-              <motion.div
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.99 }}
-              >
-                <Button>Create Study Room</Button>
+              <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
+                <Button onClick={() => setShowForm(true)}>Create Study Room</Button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.06 }}
@@ -250,9 +181,7 @@ const HomeView = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Students Online</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {mockRooms.reduce((sum, room) => sum + room.participants, 0)}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{totalParticipants}</p>
                 </div>
               </div>
             </CardContent>
@@ -265,9 +194,7 @@ const HomeView = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Files Shared</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {mockRooms.reduce((sum, room) => sum + room.filesCount, 0)}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{totalFiles}</p>
                 </div>
               </div>
             </CardContent>
@@ -280,17 +207,49 @@ const HomeView = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Messages Today</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {mockRooms.reduce((sum, room) => sum + room.messagesCount, 0)}
-                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{totalMessages}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {loading && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <BookOpen className="w-8 h-8 text-blue-500" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading study rooms...</h3>
+            <p className="text-gray-600">Please wait while we fetch the latest rooms.</p>
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <MessageSquare className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load rooms</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try Again
+            </Button>
+          </div>
+        )}
+
+        {!loading && !error && sourceRooms.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No study rooms yet</h3>
+            <p className="text-gray-600 mb-4">Be the first to create a study room and start collaborating!</p>
+            <Button onClick={() => setShowForm(true)}>Create Your First Room</Button>
+          </div>
+        )}
+
         {/* Active Rooms */}
-        {activeRooms.length > 0 && (
+        {!loading && !error && activeRooms.length > 0 && (
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
@@ -305,7 +264,7 @@ const HomeView = () => {
         )}
 
         {/* Inactive Rooms */}
-        {inactiveRooms.length > 0 && (
+        {!loading && !error && inactiveRooms.length > 0 && (
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
@@ -319,22 +278,24 @@ const HomeView = () => {
           </section>
         )}
 
-        {/* No Results */}
-        {filteredRooms.length === 0 && (
+        {/* No Search Results */}
+        {!loading && !error && sourceRooms.length > 0 && filteredRooms.length === 0 && (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No study rooms found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No matching rooms found</h3>
             <p className="text-gray-600">Try adjusting your search terms or create a new study room.</p>
           </div>
         )}
       </main>
+
+      <NewRoomDialog open={showForm} onOpenChange={setShowForm} onRoomCreated={handleRoomCreated} />
     </div>
   )
 }
 
-function RoomCard({ room }: { room: (typeof mockRooms)[0] }) {
+function RoomCard({ room }: { room: Room }) {
   const occupancyPercentage = (room.participants / room.maxParticipants) * 100
   const isNearFull = occupancyPercentage > 80
 
@@ -416,4 +377,4 @@ function RoomCard({ room }: { room: (typeof mockRooms)[0] }) {
   )
 }
 
-export default HomeView;
+export default HomeView
