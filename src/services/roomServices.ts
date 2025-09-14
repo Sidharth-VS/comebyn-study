@@ -58,3 +58,27 @@ export const getRoomById = async (id: string) => {
     return { success: false, error: (err as Error).message ?? "Unknown error" };
   }
 };
+
+export const uploadPdfToRoom = async (room_id: string, file_name: string, size: number, user_id: string, time: string) => {
+    try {
+        const res = await fetch(`/api/pdf/get_pdfs`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ room_id, file_name, size, user_id, time })
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Server error: ${res.status} - ${errorText}`);
+        }
+
+        const data = await res.json();
+
+        return data;
+    } catch (err) {
+        console.error("❌ Uploading PDF failed", err);
+        return { success: false, error: (err as Error).message ?? "Unknown error" };
+    }
+};

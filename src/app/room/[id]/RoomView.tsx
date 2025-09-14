@@ -6,7 +6,6 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
-  Send,
   Upload,
   Download,
   Users,
@@ -26,11 +25,10 @@ import { Badge } from "@/src/components/ui/badge"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
-import { uploadPdf } from "@/src/services/pdfServices"
+import { uploadPdf, getPdfs } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
 import { useChatClient } from "@/src/hooks/use-chat-client"
 import { getRoomById } from "@/src/services/roomServices"
-
 
 type Room = {
   id: string
@@ -54,42 +52,6 @@ const mockParticipants = [
   { id: "6", name: "Frank Miller", status: "offline", role: "member" },
 ]
 
-// Mock files
-const mockFiles = [
-  {
-    id: "1",
-    name: "Calculus_Notes_Chapter_3.pdf",
-    type: "pdf",
-    size: "2.4 MB",
-    uploadedBy: "Alice Johnson",
-    uploadedAt: "2 hours ago",
-  },
-  {
-    id: "2",
-    name: "Practice_Problems.pdf",
-    type: "pdf",
-    size: "1.8 MB",
-    uploadedBy: "Carol Davis",
-    uploadedAt: "1 hour ago",
-  },
-  {
-    id: "3",
-    name: "Integration_Techniques.pdf",
-    type: "pdf",
-    size: "3.2 MB",
-    uploadedBy: "David Wilson",
-    uploadedAt: "30 minutes ago",
-  },
-  {
-    id: "4",
-    name: "Derivative_Examples.jpg",
-    type: "image",
-    size: "856 KB",
-    uploadedBy: "Bob Smith",
-    uploadedAt: "45 minutes ago",
-  },
-]
-
 // File upload message type
 type FileMessage = {
   id: string
@@ -101,7 +63,13 @@ type FileMessage = {
   uploadStatus?: "uploading" | "success" | "error"
 }
 
-export const RoomView = () => {
+type Pdf = {
+  id: string
+  name: string
+  size: string
+}
+
+export const RoomView = ({ userId }: { userId: string }) => {
   const params = useParams()
   const router = useRouter()
   const roomId = params.id as string
@@ -110,7 +78,7 @@ export const RoomView = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const [files, setFiles] = useState(mockFiles)
+  const [files, setFiles] = useState<Pdf[]>([])
   const [fileMessages, setFileMessages] = useState<FileMessage[]>([])
 
   // Use the real chat hook (client-side only)
@@ -123,19 +91,38 @@ export const RoomView = () => {
       const roomData = await getRoomById(roomId);
 
       if (roomData.success) {
-        setRoom(roomData.room); // ✅ use .room
+        setRoom(roomData.room); 
       } else {
         console.error("❌ Failed to fetch room:", roomData.error);
       }
     };
 
+    const fetchFiles = async () => {
+      const filesData = await getPdfs(roomId);
+
+      if (filesData.success && filesData.pdfs) {
+        const obj: Pdf[] = Object.entries(filesData.pdfs).map(([key, value]: [string, any]) => ({
+          id: key,
+          name: value.name,
+          size: value.size,
+        }));
+
+        console.log("📂 Converted PDFs:", obj);
+        setFiles(obj);
+      } else {
+        console.error("❌ Failed to fetch PDFs:", filesData.error);
+        setFiles([]);
+      }
+    };
+
     if (roomId) {
       fetchRoom();
+      fetchFiles();
     }
   }, [roomId]);
 
 
-  if (!room) {
+  if (!room || !files || userId === null) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="flex flex-col items-center text-center">
@@ -189,17 +176,7 @@ export const RoomView = () => {
     formData.append("action", action)
 
     try {
-      const res = await uploadPdf(roomId, selectedFile.name, selectedFile);
-
-      /*const res = await fetch("/api/pdf", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!res.ok) {
-        const errorText = await res.text()
-        throw new Error(`Server ${res.status}: ${errorText}`)
-      }*/
+      const res = await uploadPdf(roomId, selectedFile.name, selectedFile, userId, new Date().toISOString());
      
       console.log("✅ PDF processed:", res);
 
@@ -208,10 +185,7 @@ export const RoomView = () => {
       const newFile = {
         id: Date.now().toString(),
         name: selectedFile.name,
-        type: "pdf",
-        size: `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`,
-        uploadedBy: "You",
-        uploadedAt: "Just now",
+        size: `${(selectedFile.size / 1024 / 1024).toFixed(2)}`,
       }
       setFiles((prev) => [newFile, ...prev])
     } 
@@ -418,15 +392,12 @@ export const RoomView = () => {
                   <CardContent>
                     <ScrollArea className="h-64">
                       <div className="space-y-3">
-                        {files.map((file) => (
+                        {files.length > 0 && files.map((file) => (
                           <div key={file.id} className="flex items-start space-x-3 p-2 rounded border">
-                            <div className="flex-shrink-0 mt-1">{getFileIcon(file.type)}</div>
+                            <div className="flex-shrink-0 mt-1">{getFileIcon('pdf')}</div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-                              <p className="text-xs text-gray-600">
-                                {file.size} • by {file.uploadedBy}
-                              </p>
-                              <p className="text-xs text-gray-400">{file.uploadedAt}</p>
+                              <p className="text-sm text-gray-600">{file.size} MB</p>
                             </div>
                             <Button variant="ghost" size="sm">
                               <Download className="w-3 h-3" />

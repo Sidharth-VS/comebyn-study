@@ -13,7 +13,7 @@ const Page = async() => {
     redirect('/sign-in');
   }
   return(
-    <RoomView />
+    <RoomView userId={session.user.id} />
   )
 }
 
