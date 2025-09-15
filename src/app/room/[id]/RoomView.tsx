@@ -9,7 +9,7 @@ import {
   Upload,
   Download,
   Users,
-  Settings,
+  Trash,
   Pin,
   Search,
   FileText,
@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/ta
 import { uploadPdf, getPdfs, getPdfDownloadUrl, downloadPdfFromUrl } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
 import { useChatClient } from "@/src/hooks/use-chat-client"
-import { getRoomById } from "@/src/services/roomServices"
+import { getRoomById, deleteRoom } from "@/src/services/roomServices"
 
 type Room = {
   id: string
@@ -40,6 +40,7 @@ type Room = {
   maxParticipants: number
   createdAt: string
   updatedAt: string
+  userId: string
   // Add other room properties as needed
 }
 // Mock participants
@@ -199,6 +200,13 @@ export const RoomView = ({ userId }: { userId: string }) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
+    }
+  }
+
+  const handleDeleteRoom = () => {
+    if (confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
+      deleteRoom(roomId);
+      router.push("/");
     }
   }
 
@@ -429,7 +437,11 @@ export const RoomView = ({ userId }: { userId: string }) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Room Info</span>
-                  <Settings className="w-4 h-4" />
+                  {userId === room.userId && (
+                    <Button variant="destructive" size="sm" onClick={handleDeleteRoom}>
+                      <Trash className="w-4 h-4" />
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">

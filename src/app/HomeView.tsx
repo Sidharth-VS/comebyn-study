@@ -16,6 +16,7 @@ import { authClient } from "../lib/auth-client"
 type Room = {
   id: string
   name: string
+  userid: string
   description: string
   participants: number
   maxParticipants: number
@@ -41,9 +42,10 @@ const normalizeRoom = (room: any): Room => ({
   recentActivity: room.recentActivity ?? "N/A",
   filesCount: room.filesCount ?? 0,
   messagesCount: room.messagesCount ?? 0,
+  userid: room.userid ?? "",
 })
 
-const HomeView = () => {
+const HomeView = ( { userId }: { userId: string } ) => {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
@@ -290,7 +292,7 @@ const HomeView = () => {
         )}
       </main>
 
-      <NewRoomDialog open={showForm} onOpenChange={setShowForm} onRoomCreated={handleRoomCreated} />
+      <NewRoomDialog open={showForm} onOpenChange={setShowForm} onRoomCreated={handleRoomCreated} userId={userId} />
     </div>
   )
 }

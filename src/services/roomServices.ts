@@ -17,7 +17,7 @@ export const getAllRooms = async() => {
     }
 }
 
-export const createRoom = async (roomDetails: { name: string; description: string; category: string; subject: string; }) => {
+export const createRoom = async (roomDetails: { name: string; description: string; category: string; subject: string; user_id: string }) => {
     try {
         const res = await fetch("/api/room/create_room", {
             method: "POST",
@@ -79,6 +79,24 @@ export const uploadPdfToRoom = async (room_id: string, file_name: string, size: 
         return data;
     } catch (err) {
         console.error("❌ Uploading PDF failed", err);
+        return { success: false, error: (err as Error).message ?? "Unknown error" };
+    }
+};
+
+export const deleteRoom = async (id: string) => {
+    try {
+        const res = await fetch(`/api/room/delete_room/${id}`, {
+            method: "DELETE",
+        }); 
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Server error: ${res.status} - ${errorText}`);
+        }
+
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.error("❌ Deleting room failed", err);
         return { success: false, error: (err as Error).message ?? "Unknown error" };
     }
 };

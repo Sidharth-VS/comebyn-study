@@ -12,14 +12,16 @@ import { Textarea } from "@/src/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
 import { useState } from "react"
 import { useToast } from '@/src/components/ui/use-toast'
+import { user } from '@/src/db/schema'
 
-interface AgentFormProps {
+interface RoomFormProps {
   onSuccess?: () => void
   onCancel?: () => void
   onRoomCreated?: (room: any) => void
+  userId: string
 }
 
-export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated }: AgentFormProps) => {
+export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated, userId }: RoomFormProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -41,6 +43,7 @@ export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated }: AgentForm
         description: values.description,
         category: values.category,
         subject: values.subject,
+        user_id: userId,
       }
       const response = await createRoom(newRoom)
 

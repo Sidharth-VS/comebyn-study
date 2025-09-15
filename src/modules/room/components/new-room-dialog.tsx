@@ -5,9 +5,10 @@ interface NewRoomDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onRoomCreated?: (room: any) => void
+  userId: string,
 }
 
-export const NewRoomDialog = ({ open, onOpenChange, onRoomCreated }: NewRoomDialogProps) => {
+export const NewRoomDialog = ({ open, onOpenChange, onRoomCreated, userId }: NewRoomDialogProps) => {
   return (
     <ResponsiveDialog
       open={open}
@@ -19,6 +20,7 @@ export const NewRoomDialog = ({ open, onOpenChange, onRoomCreated }: NewRoomDial
         onSuccess={() => onOpenChange(false)}
         onCancel={() => onOpenChange(false)}
         onRoomCreated={onRoomCreated}
+        userId={userId}
       />
     </ResponsiveDialog>
   )
