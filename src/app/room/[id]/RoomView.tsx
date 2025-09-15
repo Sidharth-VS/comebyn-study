@@ -40,7 +40,7 @@ type Room = {
   maxParticipants: number
   createdAt: string
   updatedAt: string
-  userId: string
+  user_id: string
   // Add other room properties as needed
 }
 // Mock participants
@@ -207,6 +207,8 @@ export const RoomView = ({ userId }: { userId: string }) => {
     if (confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
       deleteRoom(roomId);
       router.push("/");
+      //make it refresh the home page
+      router.refresh();
     }
   }
 
@@ -241,6 +243,8 @@ export const RoomView = ({ userId }: { userId: string }) => {
         }
       });
   }
+
+  console.log("User ID:", userId, "Room Owner ID:", room.user_id);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -437,8 +441,8 @@ export const RoomView = ({ userId }: { userId: string }) => {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center justify-between">
                   <span>Room Info</span>
-                  {userId === room.userId && (
-                    <Button variant="destructive" size="sm" onClick={handleDeleteRoom}>
+                  {userId === room.user_id && (
+                    <Button variant="outline" size="sm" onClick={handleDeleteRoom}>
                       <Trash className="w-4 h-4" />
                     </Button>
                   )}
