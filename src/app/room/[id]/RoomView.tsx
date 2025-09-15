@@ -25,7 +25,7 @@ import { Badge } from "@/src/components/ui/badge"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
-import { uploadPdf, getPdfs } from "@/src/services/pdfServices"
+import { uploadPdf, getPdfs, getPdfDownloadUrl, downloadPdfFromUrl } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
 import { useChatClient } from "@/src/hooks/use-chat-client"
 import { getRoomById } from "@/src/services/roomServices"
@@ -106,8 +106,6 @@ export const RoomView = ({ userId }: { userId: string }) => {
           name: value.name,
           size: value.size,
         }));
-
-        console.log("📂 Converted PDFs:", obj);
         setFiles(obj);
       } else {
         console.error("❌ Failed to fetch PDFs:", filesData.error);
@@ -220,6 +218,21 @@ export const RoomView = ({ userId }: { userId: string }) => {
       msg.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
       msg.user.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  
+  const downloadPdf = (fileId: string) => {
+    const file = files.find((f) => f.id === fileId)
+
+    if (!file) return
+    console.log("Downloading file:", file);
+
+    getPdfDownloadUrl(roomId, file.name)
+      .then((res) => {
+        if (res.success && res.url) {    
+          downloadPdfFromUrl(res.url, file.name);
+        }
+      });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -399,7 +412,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
                               <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
                               <p className="text-sm text-gray-600">{file.size} MB</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => downloadPdf(file.id)}>
                               <Download className="w-3 h-3" />
                             </Button>
                           </div>

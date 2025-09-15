@@ -59,3 +59,43 @@ export const getPdfs = async (room_id: string) => {
     return { success: false, error: (err as Error).message };
   }
 };
+
+//send a request to the backend containing room id and file name as formData to get a presigned url for downloading the pdf from s3
+export const getPdfDownloadUrl = async (room_id: string, file_name: string) => {
+  const formData = new FormData();
+  formData.append("room_id", room_id);  
+  formData.append("file_name", file_name);
+  try {
+    const res = await fetch("/api/pdf/get_download_url", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+    const data = await res.json();
+    return { success: true, url: data.download_url };
+  } catch (err) {
+    console.error("❌ Fetch download URL failed:", err);
+    return { success: false, error: (err as Error).message };
+  }
+};
+
+export const downloadPdfFromUrl = async (url: string, file_name: string) => {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Download failed: ${res.status}`);
+    }
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = file_name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error("❌ Download failed:", err);
+  }
+};
