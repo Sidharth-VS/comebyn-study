@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const res = await fetch(`${process.env.BACKEND_URL}/process_pdf`, {
+    const res = await fetch(`${process.env.BACKEND_URL}/summarize_pdf`, {
       method: "POST",
       body: formData,
     });
