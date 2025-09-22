@@ -99,3 +99,38 @@ export const downloadPdfFromUrl = async (url: string, file_name: string) => {
     console.error("❌ Download failed:", err);
   }
 };
+
+export const summarizePdf = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/pdf/summarize", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.error || `Server error: ${res.status}`);
+    }
+
+    // Get PDF blob
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+
+    // Trigger download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name.replace(".pdf", "_summary.pdf");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    return { success: true };
+  } catch (err) {
+    console.error("❌ Summarization failed:", err);
+    return { success: false, error: (err as Error).message };
+  }
+};

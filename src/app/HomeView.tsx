@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation"
 import { getAllRooms } from "@/src/services/roomServices"
 import { NewRoomDialog } from "@/src/modules/room/components/new-room-dialog"
 import { authClient } from "../lib/auth-client"
+import StaggeredDropDown from "../components/navdropdown"
 
 type Room = {
   id: string
@@ -113,21 +114,20 @@ const HomeView = ( { userId }: { userId: string } ) => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-white" />
-              </div>
+            <div className="flex items-center space-x-4">
+              <StaggeredDropDown />
               <h1 className="text-2xl font-bold text-gray-900">ComeByN Study</h1>
             </div>
             <div className="flex items-center gap-2">
               <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
-                <Button onClick={() => setShowForm(true)}>Create Study Room</Button>
+                <Button onClick={() => setShowForm(true)} className=" bg-blue-600 hover:bg-blue-700">Create Study Room</Button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <Button
+                  className=" bg-blue-600 hover:bg-blue-70"
                   onClick={() =>
                     authClient.signOut({
                       fetchOptions: {
