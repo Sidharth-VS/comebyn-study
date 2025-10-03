@@ -1,6 +1,6 @@
 "use client"
 
-import { FiHome, FiMenu, FiUsers, FiBookOpen, FiSettings, FiUser } from "react-icons/fi"
+import { FiMenu, FiUsers, FiBookOpen, FiSettings, FiFileText } from "react-icons/fi"
 import { motion } from "framer-motion"
 import { type Dispatch, type SetStateAction, useState } from "react"
 import type { IconType } from "react-icons"
@@ -28,6 +28,7 @@ const StaggeredDropDown = () => {
       >
         <Option setOpen={setOpen} Icon={FiUsers} text="Study Rooms" href="/" />
         <Option setOpen={setOpen} Icon={FiBookOpen} text="Summarize PDF" href="/summarize" />
+        <Option setOpen={setOpen} Icon={FiFileText} text="Generate Quiz" href="/generate_quiz" />
         <Option setOpen={setOpen} Icon={FiSettings} text="Settings" href="/" />
       </motion.ul>
     </motion.div>

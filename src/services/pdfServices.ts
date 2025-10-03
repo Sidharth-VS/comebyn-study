@@ -134,3 +134,53 @@ export const summarizePdf = async (file: File) => {
     return { success: false, error: (err as Error).message };
   }
 };
+
+export type QuizQuestion = {
+  id?: string;
+  question: string;
+  type: 'multiple_choice' | 'short_answer';
+  options: string[];
+  answer: string;
+  explanation?: string;
+};
+
+export type ApiResponse = {
+  questions: QuizQuestion[];
+  total_questions: number;
+  expected_questions: number;
+  metadata: {
+    generated_at: string;
+    source: string;
+  };
+};
+
+export const generateQuiz = async (
+  file: File,
+  difficulty: string,
+  numQuestions: number,
+): Promise<ApiResponse> => {
+  try{
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("difficulty", difficulty);
+    formData.append("num_questions", numQuestions.toString());
+
+    const res = await fetch("/api/pdf/generate_quiz", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null);
+      throw new Error(errorData?.error || `Server error: ${res.status}`);
+    }
+
+    const responseData: ApiResponse = await res.json();
+    console.log("API Response:", responseData);
+    
+    return responseData;
+  } catch(error){
+    console.error("❌ Quiz Generation failed:", error);
+    throw error;
+  }
+}; 
