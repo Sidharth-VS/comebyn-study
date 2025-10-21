@@ -148,7 +148,7 @@ export const CreateRoomForm = ({ onSuccess, onCancel, onRoomCreated, userId }: R
                 Cancel
               </Button>
             )}
-            <Button disabled={isLoading} type="submit">
+            <Button disabled={isLoading} className='bg-green-600 hover:bg-green-700' type="submit">
               {isLoading ? "Creating..." : "Create Room"}
             </Button>
           </div>

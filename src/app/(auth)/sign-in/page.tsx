@@ -1,10 +1,8 @@
 import Link from "next/link"
-import { BookOpen } from "lucide-react"
 import { redirect } from "next/navigation"
 import { headers } from "next/headers"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { cn } from "@/src/lib/utils"
 import { LoginForm } from "./sign-in-form"
 import { SiteLogo } from "@/src/components/ui/site-logo"
 import { auth } from "@/src/lib/auth"
@@ -26,23 +24,14 @@ const Page = async () => {
             <SiteLogo />
             <span className="text-xl font-semibold tracking-tight">ComeByN Study</span>
           </div>
-          <Link
-            href="/"
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50",
-            )}
-          >
-            <BookOpen className="h-4 w-4" />
-            {"Explore rooms"}
-          </Link>
         </header>
 
         {/* Centered login card (preview removed) */}
         <div className="mx-auto max-w-xl">
           <Card className="border-slate-200 shadow-sm">
-            <CardHeader>
+            <CardHeader className="justify-items-center">
               <CardTitle className="text-2xl">Welcome back</CardTitle>
-              <CardDescription>Log in to continue to StudyRooms</CardDescription>
+              <CardDescription>Log in to continue studying</CardDescription>
             </CardHeader>
             <CardContent>
               <LoginForm />

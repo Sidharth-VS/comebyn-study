@@ -109,9 +109,9 @@ const HomeView = ( { userId }: { userId: string } ) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br bg-violet-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="shadow-sm border-b bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -120,14 +120,14 @@ const HomeView = ( { userId }: { userId: string } ) => {
             </div>
             <div className="flex items-center gap-2">
               <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
-                <Button onClick={() => setShowForm(true)} className=" bg-blue-600 hover:bg-blue-700">Create Study Room</Button>
+                <Button onClick={() => setShowForm(true)} className=" bg-green-600 hover:bg-green-700">Create Study Room</Button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <Button
-                  className=" bg-blue-600 hover:bg-blue-70"
+                  className=" bg-red-700 hover:bg-red-800"
                   onClick={() =>
                     authClient.signOut({
                       fetchOptions: {
@@ -158,62 +158,6 @@ const HomeView = ( { userId }: { userId: string } ) => {
               className="pl-10 pr-4 py-2 w-full"
             />
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Active Rooms</p>
-                  <p className="text-2xl font-bold text-gray-900">{activeRooms.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Users className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Students Online</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalParticipants}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Upload className="w-4 h-4 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Files Shared</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalFiles}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                  <MessageSquare className="w-4 h-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Messages Today</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalMessages}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {loading && (
@@ -255,7 +199,7 @@ const HomeView = ( { userId }: { userId: string } ) => {
           <section className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
               <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              Active Study Rooms ({activeRooms.length})
+              Study Rooms ({activeRooms.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeRooms.map((room) => (
@@ -363,7 +307,7 @@ function RoomCard({ room }: { room: Room }) {
 
         <Link href={`/room/${room.id}`}>
           <Button
-            className="w-full"
+            className="w-full bg-purple-700 hover:bg-indigo-800"
             disabled={!room.isActive || room.participants >= room.maxParticipants}
             variant={room.isActive ? "default" : "secondary"}
           >

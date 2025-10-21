@@ -247,7 +247,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
   console.log("User ID:", userId, "Room Owner ID:", room.user_id);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-indigo-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -456,12 +456,6 @@ export const RoomView = ({ userId }: { userId: string }) => {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Category</p>
                   <Badge variant="secondary">{room.category}</Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Capacity</p>
-                  <p className="text-sm text-gray-600">
-                    {room.participants}/{room.maxParticipants} students
-                  </p>
                 </div>
               </CardContent>
             </Card>

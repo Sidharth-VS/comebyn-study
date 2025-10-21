@@ -166,7 +166,7 @@ export const LoginForm = () => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.99 }}
           >
-            <Button type="submit" className="w-full" disabled={pending}>
+            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={pending}>
               {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {pending ? "Signing in..." : "Sign in"}
             </Button>

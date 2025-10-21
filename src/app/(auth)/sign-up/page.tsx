@@ -25,22 +25,13 @@ const Page = async () => {
           <div className="flex items-center gap-2">
             <SiteLogo />
             <span className="text-xl font-semibold tracking-tight">ComeByN Study</span>
-          </div>
-          <Link
-            href="/"
-            className={cn(
-              "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50",
-            )}
-          >
-            <BookOpen className="h-4 w-4" />
-            {"Explore rooms"}
-          </Link>
+          </div>  
         </header>
 
         {/* Centered sign-up card */}
         <div className="mx-auto max-w-xl">
           <Card className="border-slate-200 shadow-sm">
-            <CardHeader>
+            <CardHeader className="justify-items-center">
               <CardTitle className="text-2xl">Create your account</CardTitle>
               <CardDescription>Join StudyRooms to start collaborating</CardDescription>
             </CardHeader>
