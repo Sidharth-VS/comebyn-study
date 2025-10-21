@@ -205,7 +205,7 @@ export const GenerateQuizView = () => {
                 <button
                   onClick={handleGenerateQuiz}
                   disabled={loading || !file}
-                  className="w-full bg-gradient-to-br from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-purple-700 focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
+                  className="w-full bg-gradient-to-br bg-[#8056c3] hover:bg-[#6232ae] text-white py-4 px-6 rounded-xl font-bold text-lg focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
                 >
                   {loading ? (
                     <>

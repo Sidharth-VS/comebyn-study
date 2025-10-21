@@ -109,7 +109,7 @@ const HomeView = ( { userId }: { userId: string } ) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br bg-violet-50">
+    <div className="min-h-screen bg-gradient-to-br bg-[#f8e6fd]">
       {/* Header */}
       <header className="shadow-sm border-b bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -120,14 +120,14 @@ const HomeView = ( { userId }: { userId: string } ) => {
             </div>
             <div className="flex items-center gap-2">
               <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
-                <Button onClick={() => setShowForm(true)} className=" bg-green-600 hover:bg-green-700">Create Study Room</Button>
+                <Button onClick={() => setShowForm(true)} className=" bg-[#8056c3] hover:bg-[#6232ae]">Create Study Room</Button>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.99 }}
               >
                 <Button
-                  className=" bg-red-700 hover:bg-red-800"
+                  className=" bg-[#F3C5FF] hover:bg-[#d29ce0] text-black"
                   onClick={() =>
                     authClient.signOut({
                       fetchOptions: {
@@ -307,7 +307,7 @@ function RoomCard({ room }: { room: Room }) {
 
         <Link href={`/room/${room.id}`}>
           <Button
-            className="w-full bg-purple-700 hover:bg-indigo-800"
+            className="w-full bg-[#8056c3] hover:bg-[#6232ae]"
             disabled={!room.isActive || room.participants >= room.maxParticipants}
             variant={room.isActive ? "default" : "secondary"}
           >

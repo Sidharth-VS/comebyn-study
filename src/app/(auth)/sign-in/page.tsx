@@ -16,22 +16,22 @@ const Page = async () => {
     redirect('/');
   }
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-sky-50">
+    <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF]">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
         {/* Header */}
         <header className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SiteLogo />
-            <span className="text-xl font-semibold tracking-tight">ComeByN Study</span>
+            <span className="text-3xl font-semibold tracking-tight text-[#FFFFFF]">ComeByN Study</span>
           </div>
         </header>
 
         {/* Centered login card (preview removed) */}
         <div className="mx-auto max-w-xl">
-          <Card className="border-slate-200 shadow-sm">
+          <Card className="border-slate-200 shadow-sm bg-slate-50">
             <CardHeader className="justify-items-center">
-              <CardTitle className="text-2xl">Welcome back</CardTitle>
-              <CardDescription>Log in to continue studying</CardDescription>
+              <CardTitle className="text-2xl text-[#6d34ca]">Welcome back</CardTitle>
+              <CardDescription className="text-[#6d34ca]">Log in to continue studying</CardDescription>
             </CardHeader>
             <CardContent>
               <LoginForm />
@@ -39,7 +39,7 @@ const Page = async () => {
                 {"Don't have an account? "}
                 <Link
                   href="/sign-up"
-                  className="font-medium text-sky-700 underline underline-offset-4 hover:text-sky-800"
+                  className="font-medium text-[#6d34ca] underline underline-offset-4 hover:text-[#23084f]"
                 >
                   {"Sign up"}
                 </Link>

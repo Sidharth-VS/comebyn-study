@@ -127,7 +127,10 @@ export const SummarizeView = () => {
 
           {/* Summarize Button */}
           <div className="flex justify-center">
-            <Button onClick={handleSummarize} disabled={!file || isProcessing}>
+            <Button 
+              className="bg-[#8056c3] hover:bg-[#6232ae]"
+              onClick={handleSummarize} disabled={!file || isProcessing}
+            >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               ) : (
