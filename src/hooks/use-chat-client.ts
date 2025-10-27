@@ -135,8 +135,17 @@ export function useChatClient(roomId: string) {
       return
     }
 
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
+    // Prevent duplicate connections
+    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
+      console.log("⚠️ Connection already exists, skipping duplicate connection")
       return
+    }
+
+    // Clean up any existing connection that might be in CLOSING state
+    if (wsRef.current) {
+      console.log("🧹 Cleaning up previous connection before creating new one")
+      wsRef.current.close()
+      wsRef.current = null
     }
 
     setConnectionState("connecting")
@@ -159,7 +168,7 @@ export function useChatClient(roomId: string) {
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log("Chat WebSocket connected")
+        console.log("🔌 Chat WebSocket connected to room:", roomId)
         setConnectionState("connected")
         reconnectAttempts.current = 0
       }
@@ -236,8 +245,9 @@ export function useChatClient(roomId: string) {
         break
 
       case "presence":
+        console.log(`📊 Presence event: ${data.action}, members: ${data.members}`)
         setMemberCount(data.members)
-        
+
         if (data.action === "join") {
           setParticipants(prev => {
             const existing = prev.find(p => p.userId === data.userId)
@@ -267,9 +277,24 @@ export function useChatClient(roomId: string) {
         break
 
       case "join-ack":
+        console.log(`✅ Join acknowledged, members: ${data.members}`)
         setMemberCount(data.members)
+
+        // Add current user to participants list
+        setParticipants(prev => {
+          const existing = prev.find(p => p.userId === data.userId)
+          if (!existing) {
+            return [...prev, {
+              userId: data.userId,
+              username: data.username || "You",
+              isOnline: true
+            }]
+          }
+          return prev
+        })
+
         // Update current user info in messages
-        setMessages(prev => 
+        setMessages(prev =>
           prev.map(msg => ({
             ...msg,
             isOwn: msg.senderId === data.userId
@@ -344,20 +369,16 @@ export function useChatClient(roomId: string) {
   // Connect on mount and when roomId changes (client-side only)
   useEffect(() => {
     if (isClient && roomId) {
+      console.log("🚀 Initiating WebSocket connection for room:", roomId)
       connect()
     }
 
     return () => {
+      console.log("🔴 Cleaning up WebSocket connection for room:", roomId)
       disconnect()
     }
-  }, [roomId, connect, disconnect, isClient])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      disconnect()
-    }
-  }, [disconnect])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId, isClient])
 
   return {
     connectionState,

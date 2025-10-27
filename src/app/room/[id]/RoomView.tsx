@@ -27,7 +27,7 @@ import { Input } from "@/src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs"
 import { uploadPdf, getPdfs, getPdfDownloadUrl, downloadPdfFromUrl } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
-import { useChatClient } from "@/src/hooks/use-chat-client"
+import type { ChatParticipant } from "@/src/hooks/use-chat-client"
 import { getRoomById, deleteRoom } from "@/src/services/roomServices"
 
 type Room = {
@@ -82,8 +82,9 @@ export const RoomView = ({ userId }: { userId: string }) => {
   const [files, setFiles] = useState<Pdf[]>([])
   const [fileMessages, setFileMessages] = useState<FileMessage[]>([])
 
-  // Use the real chat hook (client-side only)
-  const { participants, memberCount, isClient } = useChatClient(roomId)
+  // Chat data received from Chat component
+  const [participants, setParticipants] = useState<ChatParticipant[]>([])
+  const [memberCount, setMemberCount] = useState(0)
 
   const [room, setRoom] = useState<Room | null>(null)
 
@@ -120,6 +121,12 @@ export const RoomView = ({ userId }: { userId: string }) => {
     }
   }, [roomId]);
 
+
+  // Handler for receiving chat data from Chat component
+  const handleChatDataUpdate = (data: { memberCount: number; participants: ChatParticipant[] }) => {
+    setMemberCount(data.memberCount)
+    setParticipants(data.participants)
+  }
 
   if (!room || !files || userId === null) {
     return (
@@ -334,7 +341,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
 
                 {/* Real-time Chat */}
                 <div className="flex-1 overflow-hidden">
-                  <Chat roomId={roomId} className="h-full" />
+                  <Chat roomId={roomId} className="h-full" onDataUpdate={handleChatDataUpdate} />
                 </div>
 
                 {/* File Upload Controls */}
