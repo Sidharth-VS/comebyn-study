@@ -1,4 +1,4 @@
-import { text, pgTable, timestamp, boolean } from "drizzle-orm/pg-core";
+import { text, pgTable, timestamp, boolean, integer, uuid } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text('id').primaryKey(),
@@ -51,4 +51,38 @@ export const jwks = pgTable("jwks", {
   publicKey: text("public_key").notNull(),
   privateKey: text("private_key").notNull(),
   createdAt: timestamp("created_at").notNull(),
+});
+
+export const flashcardSet = pgTable("flashcard_set", {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  sourcePdf: text('source_pdf'),
+  difficulty: text('difficulty').notNull(), // "easy" | "medium" | "hard"
+  topicFocus: text('topic_focus'),
+  totalCards: integer('total_cards').notNull(),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull()
+});
+
+export const flashcard = pgTable("flashcard", {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  setId: text('set_id').notNull().references(() => flashcardSet.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(), // "concept" | "qa"
+  frontContent: text('front_content').notNull(),
+  backContent: text('back_content').notNull(),
+  order: integer('order').notNull(),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull()
+});
+
+export const flashcardProgress = pgTable("flashcard_progress", {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  cardId: text('card_id').notNull().references(() => flashcard.id, { onDelete: 'cascade' }),
+  status: text('status').notNull(), // "new" | "learning" | "known"
+  masteryLevel: integer('mastery_level').default(0).notNull(), // 0-5 scale
+  lastReviewed: timestamp('last_reviewed'),
+  reviewCount: integer('review_count').default(0).notNull(),
+  createdAt: timestamp('created_at').$defaultFn(() => new Date()).notNull(),
+  updatedAt: timestamp('updated_at').$defaultFn(() => new Date()).notNull()
 });

@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { type Dispatch, type SetStateAction, useState } from "react"
 import type { IconType } from "react-icons"
 import Link from "next/link"
-import { Brain } from "lucide-react"
+import { Brain, Layers } from "lucide-react"
 
 const StaggeredDropDown = () => {
   const [open, setOpen] = useState(false)
@@ -29,6 +29,7 @@ const StaggeredDropDown = () => {
       >
         <Option setOpen={setOpen} Icon={FiBookOpen} text="Summarize PDF" href="/summarize" />
         <Option setOpen={setOpen} Icon={Brain} text="Generate Quiz" href="/generate_quiz" />
+        <Option setOpen={setOpen} Icon={Layers} text="Flashcards" href="/flashcards/library" />
       </motion.ul>
     </motion.div>
   )
