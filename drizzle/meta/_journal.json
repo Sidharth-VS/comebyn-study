@@ -15,6 +15,13 @@
       "when": 1758516245702,
       "tag": "0001_graceful_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762158271816,
+      "tag": "0002_marvelous_prowler",
+      "breakpoints": true
     }
   ]
 }
