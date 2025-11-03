@@ -13,12 +13,13 @@ import { useChatClient, type ChatMessage, type ChatParticipant } from "@/src/hoo
 interface ChatProps {
   roomId: string
   className?: string
+  onDataUpdate?: (data: { memberCount: number; participants: ChatParticipant[] }) => void
 }
 
 /**
  * Real-time chat component with WebSocket integration
  */
-export function Chat({ roomId, className = "" }: ChatProps) {
+export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -53,6 +54,15 @@ export function Chat({ roomId, className = "" }: ChatProps) {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  /**
+   * Notify parent component when memberCount or participants change
+   */
+  useEffect(() => {
+    if (onDataUpdate) {
+      onDataUpdate({ memberCount, participants })
+    }
+  }, [memberCount, participants, onDataUpdate])
 
   /**
    * Handle sending a message

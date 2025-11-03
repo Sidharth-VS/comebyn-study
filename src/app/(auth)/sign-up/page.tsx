@@ -20,13 +20,12 @@ const Page = async () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF]">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
-
         {/* Centered sign-up card */}
         <div className="mx-auto max-w-xl">
           <Card className="border-slate-200 shadow-sm bg-slate-50">
             <CardHeader className="justify-items-center">
-              <CardTitle className="text-2xl text-[#6d34ca]">Create your account</CardTitle>
-              <CardDescription className="text-[#6d34ca]">Join StudyRooms to start collaborating</CardDescription>
+              <CardTitle className="text-2xl text-[#6d34ca]">ComeByN Study</CardTitle>
+              <CardDescription className="text-[#6d34ca]">Join to start collaborating</CardDescription>
             </CardHeader>
             <CardContent>
               <SignupForm />

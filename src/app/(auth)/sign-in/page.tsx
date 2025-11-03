@@ -16,14 +16,14 @@ const Page = async () => {
     redirect('/');
   }
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF]">
+    <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF] py-15">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
 
         {/* Centered login card (preview removed) */}
         <div className="mx-auto max-w-xl">
           <Card className="border-slate-200 shadow-sm bg-slate-50">
             <CardHeader className="justify-items-center">
-              <CardTitle className="text-2xl text-[#6d34ca]">Welcome back</CardTitle>
+              <CardTitle className="text-2xl text-[#6d34ca]">ComeByN Study</CardTitle>
               <CardDescription className="text-[#6d34ca]">Log in to continue studying</CardDescription>
             </CardHeader>
             <CardContent>
