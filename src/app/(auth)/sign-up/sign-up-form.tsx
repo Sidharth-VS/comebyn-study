@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/src/components/ui/form";
 import { FiGithub } from "react-icons/fi";
+import { SiteLogo } from '@/src/components/ui/site-logo';
 
 const formSchema = z
   .object({
@@ -98,6 +99,10 @@ export const SignupForm = () => {
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <SiteLogo />
+        <span className="text-xl font-semibold tracking-tight text-[#6d34ca]">ComeByN Study</span>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">

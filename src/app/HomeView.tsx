@@ -119,9 +119,6 @@ const HomeView = ( { userId }: { userId: string } ) => {
               <h1 className="text-2xl font-bold text-gray-900">ComeByN Study</h1>
             </div>
             <div className="flex items-center gap-2">
-              <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
-                <Button onClick={() => setShowForm(true)} className=" bg-[#8056c3] hover:bg-[#6232ae]">Create Study Room</Button>
-              </motion.div>
               <motion.div
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.99 }}
@@ -197,27 +194,19 @@ const HomeView = ( { userId }: { userId: string } ) => {
         {/* Active Rooms */}
         {!loading && !error && activeRooms.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-              Study Rooms ({activeRooms.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                Study Rooms ({activeRooms.length})
+              </h2>
+              <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
+                <Button onClick={() => setShowForm(true)} className="bg-[#8056c3] hover:bg-[#6232ae]">
+                  Create Study Room
+                </Button>
+              </motion.div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeRooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Inactive Rooms */}
-        {!loading && !error && inactiveRooms.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-              <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-              Inactive Rooms ({inactiveRooms.length})
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {inactiveRooms.map((room) => (
                 <RoomCard key={room.id} room={room} />
               ))}
             </div>
@@ -246,21 +235,21 @@ function RoomCard({ room }: { room: Room }) {
   const isNearFull = occupancyPercentage > 80
 
   return (
-    <Card className={`transition-all duration-200 hover:shadow-lg ${room.isActive ? "hover:scale-105" : "opacity-75"}`}>
+    <Card className={`transition-all duration-200 hover:shadow-lg ${room.isActive ? "hover:scale-105" : "opacity-75"} overflow-hidden`}>
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-1">{room.name}</CardTitle>
-            <div className="flex items-center space-x-2 mb-2">
-              <Badge variant="secondary" className="text-xs">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 truncate">{room.name}</CardTitle>
+            <div className="flex items-center space-x-2 mb-2 flex-wrap gap-2">
+              <Badge variant="secondary" className="text-xs truncate">
                 {room.category}
               </Badge>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs truncate">
                 {room.subject}
               </Badge>
             </div>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 flex-shrink-0">
             {room.isActive ? (
               <MessageSquare className="w-4 h-4 text-green-500" />
             ) : (
@@ -281,11 +270,6 @@ function RoomCard({ room }: { room: Room }) {
             <Upload className="w-4 h-4" />
             <span>{room.filesCount} files</span>
           </div>
-          <div className="flex items-center space-x-1 text-gray-600">
-            <MessageSquare className="w-4 h-4" />
-            <span>{room.messagesCount} messages</span>
-          </div>
-          <div className="text-xs text-gray-500">Active {room.recentActivity}</div>
         </div>
 
         {/* Occupancy Bar */}
@@ -297,7 +281,7 @@ function RoomCard({ room }: { room: Room }) {
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="flex flex-2 gap-1 mb-4">
           {room.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
               #{tag}

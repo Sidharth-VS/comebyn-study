@@ -29,7 +29,6 @@ const StaggeredDropDown = () => {
       >
         <Option setOpen={setOpen} Icon={FiBookOpen} text="Summarize PDF" href="/summarize" />
         <Option setOpen={setOpen} Icon={Brain} text="Generate Quiz" href="/generate_quiz" />
-        <Option setOpen={setOpen} Icon={FiSettings} text="Settings" href="/" />
       </motion.ul>
     </motion.div>
   )

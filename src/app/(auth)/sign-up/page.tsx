@@ -20,13 +20,6 @@ const Page = async () => {
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF]">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
-        {/* Header */}
-        <header className="mb-10 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SiteLogo />
-            <span className="text-3xl font-semibold tracking-tight text-white">ComeByN Study</span>
-          </div>  
-        </header>
 
         {/* Centered sign-up card */}
         <div className="mx-auto max-w-xl">
