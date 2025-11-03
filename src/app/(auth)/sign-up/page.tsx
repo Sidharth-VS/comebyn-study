@@ -18,22 +18,22 @@ const Page = async () => {
     redirect('/');
   }
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#845EC2] to-[#F3C5FF]">
+    <main className="min-h-screen bg-gradient-to-br bg-[#efeee5] py-15">
       <div className="mx-auto max-w-6xl px-4 py-8 md:py-12">
         {/* Centered sign-up card */}
         <div className="mx-auto max-w-xl">
-          <Card className="border-slate-200 shadow-sm bg-slate-50">
+          <Card className="border-gray-100 shadow-lg bg-[#f9f8f0]">
             <CardHeader className="justify-items-center">
-              <CardTitle className="text-2xl text-[#6d34ca]">ComeByN Study</CardTitle>
-              <CardDescription className="text-[#6d34ca]">Join to start collaborating</CardDescription>
+              <CardTitle className="text-2xl text-[#1F2937]">ComeByN Study</CardTitle>
+              <CardDescription className="text-gray-600">Join to start collaborating</CardDescription>
             </CardHeader>
             <CardContent>
               <SignupForm />
-              <p className="mt-6 text-center text-sm text-slate-600">
+              <p className="mt-6 text-center text-sm text-gray-600">
                 {"Already have an account? "}
                 <Link
                   href="/sign-in"
-                  className="font-medium text-[#6d34ca] underline underline-offset-4 hover:text-[#23084f]"
+                  className="font-medium text-[#7C3AED] underline underline-offset-4 hover:text-[#6D28D9]"
                 >
                   {"Log in"}
                 </Link>

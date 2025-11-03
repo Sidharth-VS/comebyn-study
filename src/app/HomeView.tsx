@@ -109,14 +109,14 @@ const HomeView = ( { userId }: { userId: string } ) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br bg-[#f8e6fd]">
+    <div className="min-h-screen bg-gradient-to-br bg-[#efeee5]">
       {/* Header */}
-      <header className="shadow-sm border-b bg-white">
+      <header className="shadow-sm border-b bg-[#f9f8f0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <StaggeredDropDown />
-              <h1 className="text-2xl font-bold text-gray-900">ComeByN Study</h1>
+              <h1 className="text-2xl font-bold text-[#1F2937]">ComeByN Study</h1>
             </div>
             <div className="flex items-center gap-2">
               <motion.div
@@ -124,7 +124,7 @@ const HomeView = ( { userId }: { userId: string } ) => {
                 whileTap={{ scale: 0.99 }}
               >
                 <Button
-                  className=" bg-[#F3C5FF] hover:bg-[#d29ce0] text-black"
+                  className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                   onClick={() =>
                     authClient.signOut({
                       fetchOptions: {
@@ -162,7 +162,7 @@ const HomeView = ( { userId }: { userId: string } ) => {
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <BookOpen className="w-8 h-8 text-blue-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading study rooms...</h3>
+            <h3 className="text-lg font-medium text-[#1F2937] mb-2">Loading study rooms...</h3>
             <p className="text-gray-600">Please wait while we fetch the latest rooms.</p>
           </div>
         )}
@@ -172,9 +172,9 @@ const HomeView = ( { userId }: { userId: string } ) => {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to load rooms</h3>
+            <h3 className="text-lg font-medium text-[#1F2937] mb-2">Failed to load rooms</h3>
             <p className="text-gray-600 mb-4">{error}</p>
-            <Button onClick={() => window.location.reload()} variant="outline">
+            <Button onClick={() => window.location.reload()} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
               Try Again
             </Button>
           </div>
@@ -185,9 +185,9 @@ const HomeView = ( { userId }: { userId: string } ) => {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Plus className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No study rooms yet</h3>
+            <h3 className="text-lg font-medium text-[#1F2937] mb-2">No study rooms yet</h3>
             <p className="text-gray-600 mb-4">Be the first to create a study room and start collaborating!</p>
-            <Button onClick={() => setShowForm(true)}>Create Your First Room</Button>
+            <Button onClick={() => setShowForm(true)} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">Create Your First Room</Button>
           </div>
         )}
 
@@ -195,12 +195,12 @@ const HomeView = ( { userId }: { userId: string } ) => {
         {!loading && !error && activeRooms.length > 0 && (
           <section className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+              <h2 className="text-xl font-semibold text-[#1F2937] flex items-center">
+                <div className="w-3 h-3 bg-[#06B6D4] rounded-full mr-2"></div>
                 Study Rooms ({activeRooms.length})
               </h2>
               <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.99 }}>
-                <Button onClick={() => setShowForm(true)} className="bg-[#8056c3] hover:bg-[#6232ae]">
+                <Button onClick={() => setShowForm(true)} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
                   Create Study Room
                 </Button>
               </motion.div>
@@ -219,7 +219,7 @@ const HomeView = ( { userId }: { userId: string } ) => {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No matching rooms found</h3>
+            <h3 className="text-lg font-medium text-[#1F2937] mb-2">No matching rooms found</h3>
             <p className="text-gray-600">Try adjusting your search terms or create a new study room.</p>
           </div>
         )}
@@ -235,23 +235,23 @@ function RoomCard({ room }: { room: Room }) {
   const isNearFull = occupancyPercentage > 80
 
   return (
-    <Card className={`transition-all duration-200 hover:shadow-lg ${room.isActive ? "hover:scale-105" : "opacity-75"} overflow-hidden`}>
+    <Card className={`transition-all duration-200 hover:shadow-lg ${room.isActive ? "hover:scale-105" : "opacity-75"} overflow-hidden bg-[#f9f8f0]`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-1 truncate">{room.name}</CardTitle>
+            <CardTitle className="text-lg font-semibold text-[#1F2937] mb-1 truncate">{room.name}</CardTitle>
             <div className="flex items-center space-x-2 mb-2 flex-wrap gap-2">
-              <Badge variant="secondary" className="text-xs truncate">
+              <Badge className="text-xs truncate bg-[#efeee5] text-[#1F2937]">
                 {room.category}
               </Badge>
-              <Badge variant="outline" className="text-xs truncate">
+              <Badge className="text-xs truncate bg-[#efeee5] text-[#1F2937]">
                 {room.subject}
               </Badge>
             </div>
           </div>
           <div className="flex items-center space-x-1 flex-shrink-0">
             {room.isActive ? (
-              <MessageSquare className="w-4 h-4 text-green-500" />
+              <MessageSquare className="w-4 h-4 text-[#06B6D4]" />
             ) : (
               <MessageSquare className="w-4 h-4 text-gray-400" />
             )}
@@ -275,7 +275,7 @@ function RoomCard({ room }: { room: Room }) {
         {/* Occupancy Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
           <div
-            className={`h-2 rounded-full transition-all duration-300 ${isNearFull ? "bg-red-500" : "bg-blue-500"}`}
+            className={`h-2 rounded-full transition-all duration-300 ${isNearFull ? "bg-red-500" : "bg-[#7C3AED]"}`}
             style={{ width: `${occupancyPercentage}%` }}
           ></div>
         </div>
@@ -283,7 +283,7 @@ function RoomCard({ room }: { room: Room }) {
         {/* Tags */}
         <div className="flex flex-2 gap-1 mb-4">
           {room.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
+            <Badge key={tag} className="text-xs bg-[#E0F2FE] text-[#0C4A6E] border-[#06B6D4]">
               #{tag}
             </Badge>
           ))}
@@ -291,7 +291,7 @@ function RoomCard({ room }: { room: Room }) {
 
         <Link href={`/room/${room.id}`}>
           <Button
-            className="w-full bg-[#8056c3] hover:bg-[#6232ae]"
+            className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
             disabled={!room.isActive || room.participants >= room.maxParticipants}
             variant={room.isActive ? "default" : "secondary"}
           >

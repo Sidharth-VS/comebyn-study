@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import GoogleIcon from '@mui/icons-material/Google';
 
 import { useForm } from "react-hook-form";
-import { OctagonAlertIcon } from "lucide-react";
+import { OctagonAlertIcon, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +41,7 @@ export const SignupForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -99,39 +100,41 @@ export const SignupForm = () => {
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6">
-      <div className="flex items-center justify-center gap-2 mb-4">
-        <SiteLogo />
-        <span className="text-xl font-semibold tracking-tight text-[#6d34ca]">ComeByN Study</span>
-      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <div className="space-y-2">
-            <div className="relative text-[#6d34ca]">
+            <div className="relative">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel className="text-[#1F2937]">Name</FormLabel>
                     <FormControl>
-                      <Input type="text" placeholder="John Doe" {...field} />
+                      <Input
+                        type="text"
+                        placeholder="John Doe"
+                        className="border-gray-200 focus:ring-[#7C3AED] focus:border-[#7C3AED]"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <div className="relative text-[#6d34ca]">
+            <div className="relative">
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-[#1F2937]">Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
                         placeholder="name@example.com"
+                        className="border-gray-200 focus:ring-[#7C3AED] focus:border-[#7C3AED]"
                         {...field}
                       />
                     </FormControl>
@@ -142,15 +145,33 @@ export const SignupForm = () => {
             </div>
           </div>
 
-          <div className="relative text-[#6d34ca]">
+          <div className="relative">
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-[#1F2937]">Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="border-gray-200 focus:ring-[#7C3AED] focus:border-[#7C3AED] pr-10"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#7C3AED] transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,15 +179,20 @@ export const SignupForm = () => {
             />
           </div>
 
-          <div className="relative text-[#6d34ca]">
+          <div className="relative">
             <FormField
               control={form.control}
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel className="text-[#1F2937]">Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      className="border-gray-200 focus:ring-[#7C3AED] focus:border-[#7C3AED]"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -175,9 +201,9 @@ export const SignupForm = () => {
           </div>
 
           {!!error && (
-            <Alert className="bg-destructive/10 border-none">
-              <OctagonAlertIcon className="h-4 w-4 !text-destructive" />
-              <AlertTitle>{error}</AlertTitle>
+            <Alert className='bg-red-50 border-red-200'>
+              <OctagonAlertIcon className='h-4 w-4 text-red-600' />
+              <AlertTitle className='text-red-700'>{error}</AlertTitle>
             </Alert>
           )}
           {message ? (
@@ -194,9 +220,9 @@ export const SignupForm = () => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.99 }}
           >
-            <Button type="submit" className="w-full bg-[#8056c3] hover:bg-[#6232ae]" disabled={pending}>
+            <Button type="submit" className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white" disabled={pending}>
               {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              {pending ? "Signing in..." : "Sign up"}
+              {pending ? "Creating account..." : "Sign up"}
             </Button>
           </motion.div>
         </form>
@@ -204,10 +230,10 @@ export const SignupForm = () => {
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <span className="w-full border-t border-slate-200" />
+          <span className="w-full border-t border-gray-200" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-slate-50 px-2 text-xs uppercase tracking-wide text-slate-500">
+          <span className="bg-[#f9f8f0] px-2 text-xs uppercase tracking-wide text-gray-500">
             Or continue with
           </span>
         </div>
@@ -221,14 +247,14 @@ export const SignupForm = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full bg-[#F3C5FF] hover:bg-[#d29ce0]"
+            className="w-full bg-[#E0F2FE] border-[#06B6D4] text-[#1F2937] hover:bg-[#B3E5FC]"
             onClick={() => onSocial("google")}
           >
             <GoogleIcon />
             {"Google"}
           </Button>
         </motion.div>
-        
+
         <motion.div
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.99 }}
@@ -236,7 +262,7 @@ export const SignupForm = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full bg-[#F3C5FF] hover:bg-[#d29ce0]"
+            className="w-full bg-[#E0F2FE] border-[#06B6D4] text-[#1F2937] hover:bg-[#B3E5FC]"
             onClick={() => onSocial("github")}
           >
             <FiGithub />

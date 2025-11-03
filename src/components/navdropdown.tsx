@@ -25,7 +25,7 @@ const StaggeredDropDown = () => {
         initial={wrapperVariants.closed}
         variants={wrapperVariants}
         style={{ originY: "top", translateX: "0%" }}
-        className="flex flex-col gap-1 p-2 rounded-lg bg-white shadow-xl absolute top-[120%] left-0 w-48 overflow-hidden border border-gray-200 z-50"
+        className="flex flex-col gap-1 p-2 rounded-lg bg-[#f9f8f0] shadow-xl absolute top-[120%] left-0 w-48 overflow-hidden border border-gray-200 z-50"
       >
         <Option setOpen={setOpen} Icon={FiBookOpen} text="Summarize PDF" href="/summarize" />
         <Option setOpen={setOpen} Icon={Brain} text="Generate Quiz" href="/generate_quiz" />

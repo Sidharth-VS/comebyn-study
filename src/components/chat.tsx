@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { Send, AlertCircle, Wifi, WifiOff, Users } from "lucide-react"
+import { Send, AlertCircle, Wifi, WifiOff, Users, Upload } from "lucide-react"
 import { Button } from "@/src/components/ui/button"
 import { Textarea } from "@/src/components/ui/textarea"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
@@ -14,12 +14,17 @@ interface ChatProps {
   roomId: string
   className?: string
   onDataUpdate?: (data: { memberCount: number; participants: ChatParticipant[] }) => void
+  fileInputRef?: React.RefObject<HTMLInputElement | null>
+  onFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onFileUpload?: () => void
+  isUploading?: boolean
+  selectedFile?: File | null
 }
 
 /**
  * Real-time chat component with WebSocket integration
  */
-export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
+export function Chat({ roomId, className = "", onDataUpdate, fileInputRef, onFileChange, onFileUpload, isUploading = false, selectedFile }: ChatProps) {
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -155,8 +160,8 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
       <div className={`flex flex-col h-full ${className}`}>
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-sm text-gray-600">Loading chat...</p>
+            <div className="w-8 h-8 border-2 border-[#7C3AED] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p className="text-sm text-[#1F2937]">Loading chat...</p>
           </div>
         </div>
       </div>
@@ -166,17 +171,17 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white">
+      <div className="flex items-center justify-between p-4 border-b bg-[#f9f8f0]">
         <div className="flex items-center space-x-2">
-          <h3 className="font-semibold text-gray-900">Chat</h3>
+          <h3 className="font-semibold text-[#1F2937]">Chat</h3>
           <div className="flex items-center space-x-1">
             {connectionStatus.icon}
             <span className="text-sm text-gray-600">{connectionStatus.text}</span>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Users className="w-4 h-4 text-gray-500" />
-          <span className="text-sm text-gray-600">{memberCount} online</span>
+          <Users className="w-4 h-4 text-[#7C3AED]" />
+          <span className="text-sm text-[#1F2937]">{memberCount} online</span>
         </div>
       </div>
 
@@ -203,7 +208,7 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="p-4 space-y-4">
             {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className="text-center text-[#1F2937] py-8">
                 <p>No messages yet. Start the conversation!</p>
               </div>
             ) : (
@@ -220,11 +225,11 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-[#1F2937]">
                         {message.senderName}
                       </span>
                       {message.isOwn && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="text-xs bg-[#7C3AED] text-white">
                           You
                         </Badge>
                       )}
@@ -232,7 +237,7 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
                         {formatTimestamp(message.timestamp)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-700">
+                    <div className="text-sm text-[#1F2937]">
                       <p className="whitespace-pre-wrap break-words">{message.text}</p>
                     </div>
                   </div>
@@ -245,12 +250,31 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
       </div>
 
       {/* Message Input */}
-      <div className="border-t p-4 bg-white">
+      <div className="border-t p-4 bg-[#f9f8f0]">
         <div className="flex space-x-2">
+          {fileInputRef && onFileUpload && (
+            <>
+              <input
+                type="file"
+                className="hidden"
+                ref={fileInputRef}
+                accept="application/pdf"
+                onChange={onFileChange}
+              />
+              <Button
+                className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
+                size="sm"
+                onClick={onFileUpload}
+                disabled={isUploading}
+              >
+                <Upload />
+              </Button>
+            </>
+          )}
           <Textarea
             placeholder={
-              connectionState === "connected" 
-                ? "Type your message..." 
+              connectionState === "connected"
+                ? "Type your message..."
                 : "Connecting to chat..."
             }
             value={newMessage}
@@ -259,10 +283,10 @@ export function Chat({ roomId, className = "", onDataUpdate }: ChatProps) {
             className="flex-1 min-h-[40px] max-h-[120px] resize-none"
             disabled={connectionState !== "connected"}
           />
-          <Button 
-            onClick={handleSendMessage} 
+          <Button
+            onClick={handleSendMessage}
             disabled={!newMessage.trim() || connectionState !== "connected"}
-            className="px-3"
+            className="px-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
           >
             <Send className="w-4 h-4" />
           </Button>

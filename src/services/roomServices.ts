@@ -87,7 +87,7 @@ export const deleteRoom = async (id: string) => {
     try {
         const res = await fetch(`/api/room/delete_room/${id}`, {
             method: "DELETE",
-        }); 
+        });
         if (!res.ok) {
             const errorText = await res.text();
             throw new Error(`Server error: ${res.status} - ${errorText}`);
@@ -97,6 +97,34 @@ export const deleteRoom = async (id: string) => {
         return data;
     } catch (err) {
         console.error("❌ Deleting room failed", err);
+        return { success: false, error: (err as Error).message ?? "Unknown error" };
+    }
+};
+
+export const downloadRoomSummaryPdf = async (roomId: string, roomName: string) => {
+    try {
+        const res = await fetch(`/api/rooms/${roomId}/summarize_pdfs`, {
+            method: "GET",
+        });
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Server error: ${res.status} - ${errorText}`);
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${roomName}-summary.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        return { success: true };
+    } catch (err) {
+        console.error("❌ Downloading summary PDF failed", err);
         return { success: false, error: (err as Error).message ?? "Unknown error" };
     }
 };

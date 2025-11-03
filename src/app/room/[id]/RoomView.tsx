@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/ta
 import { uploadPdf, getPdfs, getPdfDownloadUrl, downloadPdfFromUrl } from "@/src/services/pdfServices"
 import { Chat, ChatParticipants } from "@/src/components/chat"
 import type { ChatParticipant } from "@/src/hooks/use-chat-client"
-import { getRoomById, deleteRoom } from "@/src/services/roomServices"
+import { getRoomById, deleteRoom, downloadRoomSummaryPdf } from "@/src/services/roomServices"
 
 type Room = {
   id: string
@@ -79,6 +79,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDownloadingSummary, setIsDownloadingSummary] = useState(false)
   const [files, setFiles] = useState<Pdf[]>([])
   const [fileMessages, setFileMessages] = useState<FileMessage[]>([])
 
@@ -130,15 +131,15 @@ export const RoomView = ({ userId }: { userId: string }) => {
 
   if (!room || !files || userId === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#E8DED1] via-[#E5DAC9] to-[#DDD3C1] flex items-center justify-center">
       <div className="flex flex-col items-center text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-[#1F2937] mb-2">
           Fetching room resources
         </h1>
         <p className="text-gray-600 mb-4">
           Please wait while we retrieve the study room information.
         </p>
-        <LoaderIcon className="animate-spin h-6 w-6 text-gray-900" />
+        <LoaderIcon className="animate-spin h-6 w-6 text-[#1F2937]" />
       </div>
     </div>
     )
@@ -245,35 +246,50 @@ export const RoomView = ({ userId }: { userId: string }) => {
 
     getPdfDownloadUrl(roomId, file.name)
       .then((res) => {
-        if (res.success && res.url) {    
+        if (res.success && res.url) {
           downloadPdfFromUrl(res.url, file.name);
         }
       });
   }
 
+  const handleDownloadSummary = async () => {
+    setIsDownloadingSummary(true)
+    try {
+      const result = await downloadRoomSummaryPdf(roomId, room.name)
+      if (!result.success) {
+        alert(result.error || "Failed to download summary PDF")
+      }
+    } catch (error) {
+      console.error("Error downloading summary:", error)
+      alert("Failed to download summary PDF")
+    } finally {
+      setIsDownloadingSummary(false)
+    }
+  }
+
   console.log("User ID:", userId, "Room Owner ID:", room.user_id);
 
   return (
-    <div className="min-h-screen bg-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br bg-[#efeee5]">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-[#f9f8f0] shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+              <Button variant="ghost" size="sm" onClick={() => router.push("/")} className="text-[#1F2937]">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{room.name}</h1>
+                <h1 className="text-xl font-bold text-[#1F2937]">{room.name}</h1>
                 <p className="text-sm text-gray-600">{room.description}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Badge variant="secondary">{room.category}</Badge>
-              <Badge variant="outline">{room.subject}</Badge>
-              <div className="flex items-center space-x-1 text-sm text-green-600">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <Badge className="bg-[#7C3AED] text-white">{room.category}</Badge>
+              <Badge className="bg-[#06B6D4] text-white">{room.subject}</Badge>
+              <div className="flex items-center space-x-1 text-sm text-[#06B6D4]">
+                <div className="w-2 h-2 rounded-full bg-[#06B6D4]"></div>
                 <span>{memberCount} students online</span>
               </div>
             </div>
@@ -285,10 +301,10 @@ export const RoomView = ({ userId }: { userId: string }) => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
-            <Card className="h-[calc(110vh-200px)] flex flex-col">
+            <Card className="h-[calc(110vh-200px)] flex flex-col bg-[#f9f8f0]">
               <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center space-x-2">
+                  <CardTitle className="flex items-center space-x-2 text-[#1F2937]">
                     <span>Discussion</span>
                   </CardTitle>
                   <div className="flex items-center space-x-2">
@@ -301,7 +317,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
                         className="pl-8 w-48"
                       />
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED] hover:text-white">
                       <Pin className="w-4 h-4" />
                     </Button>
                   </div>
@@ -311,26 +327,26 @@ export const RoomView = ({ userId }: { userId: string }) => {
               <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
                 {/* File Upload Messages */}
                 {filteredFileMessages.length > 0 && (
-                  <div className="border-b p-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">File Uploads</h4>
+                  <div className="border-b p-4 border-gray-200">
+                    <h4 className="text-sm font-medium text-[#1F2937] mb-2">File Uploads</h4>
                     <div className="space-y-2">
                       {filteredFileMessages.map((msg) => (
-                        <div key={msg.id} className="flex items-center space-x-3 p-2 bg-blue-50 rounded border">
+                        <div key={msg.id} className="flex items-center space-x-3 p-2 bg-[#E0F2FE] rounded border border-[#06B6D4]">
                           <div className="flex-shrink-0">
                             {getFileIcon("pdf")}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2">
-                              <span className="text-sm font-medium text-blue-700">{msg.fileName}</span>
+                              <span className="text-sm font-medium text-[#0C4A6E]">{msg.fileName}</span>
                               {msg.uploadStatus === "success" && <Check className="w-4 h-4 text-green-500" />}
                               {msg.uploadStatus === "error" && <X className="w-4 h-4 text-red-500" />}
                               {msg.uploadStatus === "uploading" && (
-                                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-[#06B6D4] border-t-transparent rounded-full animate-spin" />
                               )}
                             </div>
                             <p className="text-xs text-gray-600">{msg.user} • {msg.timestamp}</p>
                           </div>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" className="text-[#06B6D4] hover:text-[#0891B2]">
                             <Download className="w-3 h-3" />
                           </Button>
                         </div>
@@ -341,47 +357,16 @@ export const RoomView = ({ userId }: { userId: string }) => {
 
                 {/* Real-time Chat */}
                 <div className="flex-1 overflow-hidden">
-                  <Chat roomId={roomId} className="h-full" onDataUpdate={handleChatDataUpdate} />
-                </div>
-
-                {/* File Upload Controls */}
-                <div className="border-t p-4 flex-shrink-0">
-                  {selectedFile && (
-                    <div className="mb-2 p-2 bg-blue-50 rounded border flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm text-blue-700">{selectedFile.name}</span>
-                        <span className="text-xs text-gray-500">
-                          ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFile(null)
-                          if (fileInputRef.current) {
-                            fileInputRef.current.value = ""
-                          }
-                        }}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex space-x-2">
-                    <input
-                      type="file"
-                      className="hidden"
-                      ref={fileInputRef}
-                      accept="application/pdf"
-                      onChange={handleFileChange}
-                    />
-                    <Button variant="outline" size="sm" onClick={handleFileUpload} disabled={isUploading}>
-                      <Upload className="w-4 h-4" />
-                      {selectedFile ? (isUploading ? "Uploading..." : "Upload") : "Upload PDF"}
-                    </Button>
-                  </div>
+                  <Chat
+                    roomId={roomId}
+                    className="h-full"
+                    onDataUpdate={handleChatDataUpdate}
+                    fileInputRef={fileInputRef}
+                    onFileChange={handleFileChange}
+                    onFileUpload={handleFileUpload}
+                    isUploading={isUploading}
+                    selectedFile={selectedFile}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -390,17 +375,17 @@ export const RoomView = ({ userId }: { userId: string }) => {
           {/* Sidebar */}
           <div className="space-y-6">
             <Tabs defaultValue="participants" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="participants">Students</TabsTrigger>
-                <TabsTrigger value="files">Files</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-[#f9f8f0]">
+                <TabsTrigger value="participants" className="data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white">Students</TabsTrigger>
+                <TabsTrigger value="files" className="data-[state=active]:bg-[#7C3AED] data-[state=active]:text-white">Files</TabsTrigger>
               </TabsList>
 
               <TabsContent value="participants" className="mt-4">
-                <Card>
+                <Card className="bg-[#f9f8f0]">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center justify-between text-[#1F2937]">
                       <span>Participants ({participants.length})</span>
-                      <Users className="w-4 h-4" />
+                      <Users className="w-4 h-4 text-[#7C3AED]" />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -412,26 +397,35 @@ export const RoomView = ({ userId }: { userId: string }) => {
               </TabsContent>
 
               <TabsContent value="files" className="mt-4">
-                <Card>
+                <Card className="bg-[#f9f8f0]">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center justify-between text-[#1F2937]">
                       <span>Shared Files ({files.length})</span>
-                      <Button variant="outline" size="sm" onClick={handleFileUpload}>
-                        <Upload className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button size="sm" onClick={handleDownloadSummary} disabled={isDownloadingSummary} className="bg-[#06B6D4] hover:bg-[#0891B2] text-white">
+                          {isDownloadingSummary ? (
+                            <LoaderIcon className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                        </Button>
+                        <Button size="sm" onClick={handleFileUpload} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
+                          <Upload className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-64">
                       <div className="space-y-3">
                         {files.length > 0 && files.map((file) => (
-                          <div key={file.id} className="flex items-start space-x-3 p-2 rounded border">
+                          <div key={file.id} className="flex items-start space-x-3 p-2 rounded border border-gray-200">
                             <div className="flex-shrink-0 mt-1">{getFileIcon('pdf')}</div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                              <p className="text-sm font-medium text-[#1F2937] truncate">{file.name}</p>
                               <p className="text-sm text-gray-600">{file.size} MB</p>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => downloadPdf(file.id)}>
+                            <Button variant="ghost" size="sm" onClick={() => downloadPdf(file.id)} className="text-[#06B6D4] hover:text-[#0891B2]">
                               <Download className="w-3 h-3" />
                             </Button>
                           </div>
@@ -444,12 +438,12 @@ export const RoomView = ({ userId }: { userId: string }) => {
             </Tabs>
 
             {/* Room Info */}
-            <Card>
+            <Card className="bg-[#f9f8f0]">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center justify-between text-[#1F2937]">
                   <span>Room Info</span>
                   {userId === room.user_id && (
-                    <Button variant="outline" size="sm" onClick={handleDeleteRoom}>
+                    <Button size="sm" onClick={handleDeleteRoom} className="bg-red-500 hover:bg-red-600 text-white">
                       <Trash className="w-4 h-4" />
                     </Button>
                   )}
@@ -457,12 +451,12 @@ export const RoomView = ({ userId }: { userId: string }) => {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Subject</p>
+                  <p className="text-sm font-medium text-[#1F2937]">Subject</p>
                   <p className="text-sm text-gray-600">{room.subject}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Category</p>
-                  <Badge variant="secondary">{room.category}</Badge>
+                  <p className="text-sm font-medium text-[#1F2937]">Category</p>
+                  <Badge className="bg-[#7C3AED] text-white">{room.category}</Badge>
                 </div>
               </CardContent>
             </Card>

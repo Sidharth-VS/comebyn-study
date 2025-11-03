@@ -55,17 +55,17 @@ export const SummarizeView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br bg-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br bg-[#efeee5]">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
+      <header className="bg-[#f9f8f0] backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <Link href="/">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-100"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2 text-[#1F2937] hover:text-[#1F2937] transition-colors hover:bg-gray-200"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-sm font-medium">Back</span>
@@ -73,11 +73,11 @@ export const SummarizeView = () => {
               </Link>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-sm">
+                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] rounded-xl shadow-sm">
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">PDF Summarizer</h1>
+                  <h1 className="text-lg font-bold text-[#1F2937]">PDF Summarizer</h1>
                 </div>
               </div>
             </div>
@@ -94,26 +94,26 @@ export const SummarizeView = () => {
             onDragOver={handleDrag}
             onDragLeave={handleDrag}
             onDrop={handleDrop}
-            className={`border-dashed border-2 p-8 cursor-pointer ${
-              dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
-            }`}
+            className={`border-dashed border-2 p-8 cursor-pointer border-t-4 border-t-[#06B6D4] ${
+              dragActive ? "border-[#06B6D4] bg-[#E0F2FE]" : "border-gray-300"
+            } bg-[#f9f8f0]`}
           >
             <CardHeader>
-              <CardTitle>Upload PDF</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[#1F2937]">Upload PDF</CardTitle>
+              <CardDescription className="text-gray-600">
                 Drag & drop your PDF here, or click to select a file
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center space-y-4">
-              <Upload className="w-12 h-12 text-gray-400" />
+              <Upload className="w-12 h-12 text-[#7C3AED]" />
               <Button
-                variant="outline"
+                className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isProcessing}
               >
                 Choose File
               </Button>
-              {file && <p className="text-sm text-slate-700">{file.name}</p>}
+              {file && <p className="text-sm text-[#1F2937]">{file.name}</p>}
               {isProcessing && <Progress className="w-full" />}
             </CardContent>
             <input
@@ -127,9 +127,10 @@ export const SummarizeView = () => {
 
           {/* Summarize Button */}
           <div className="flex justify-center">
-            <Button 
-              className="bg-[#8056c3] hover:bg-[#6232ae]"
-              onClick={handleSummarize} disabled={!file || isProcessing}
+            <Button
+              className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
+              onClick={handleSummarize}
+              disabled={!file || isProcessing}
             >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
