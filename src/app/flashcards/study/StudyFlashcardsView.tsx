@@ -32,27 +32,50 @@ export const StudyFlashcardsView = () => {
   const [setId, setSetId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load flashcards from sessionStorage or from a saved set
-    const savedData = sessionStorage.getItem('generatedFlashcards');
-    const savedSetId = sessionStorage.getItem('currentFlashcardSetId');
+    // Get setId from URL query params or sessionStorage
+    const url = new URL(window.location.href);
+    const urlSetId = url.searchParams.get('setId');
 
-    if (savedData) {
-      const data = JSON.parse(savedData);
-      const normalizedCards = data.flashcards.map((card: any, index: number) => ({
-        id: card.id,
-        type: card.type,
-        frontContent: card.frontContent || card.front,
-        backContent: card.backContent || card.back,
-        order: card.order !== undefined ? card.order : index,
-      }));
-      setFlashcards(normalizedCards);
-      setFileName(data.fileName || "");
-      setDifficulty(data.difficulty || "");
-      setTopicFocus(data.topicFocus || "");
-    }
+    let activeSetId = urlSetId || sessionStorage.getItem('currentFlashcardSetId');
 
-    if (savedSetId) {
-      setSetId(savedSetId);
+    if (activeSetId) {
+      setSetId(activeSetId);
+
+      // Load flashcards from sessionStorage using setId as key
+      const setKey = `flashcardSet_${activeSetId}`;
+      const savedData = sessionStorage.getItem(setKey);
+
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        const normalizedCards = data.flashcards.map((card: any, index: number) => ({
+          id: card.id,
+          type: card.type,
+          frontContent: card.frontContent || card.front,
+          backContent: card.backContent || card.back,
+          order: card.order !== undefined ? card.order : index,
+        }));
+        setFlashcards(normalizedCards);
+        setFileName(data.fileName || "");
+        setDifficulty(data.difficulty || "");
+        setTopicFocus(data.topicFocus || "");
+      }
+    } else {
+      // Fallback: load from old generatedFlashcards key for backward compatibility
+      const savedData = sessionStorage.getItem('generatedFlashcards');
+      if (savedData) {
+        const data = JSON.parse(savedData);
+        const normalizedCards = data.flashcards.map((card: any, index: number) => ({
+          id: card.id,
+          type: card.type,
+          frontContent: card.frontContent || card.front,
+          backContent: card.backContent || card.back,
+          order: card.order !== undefined ? card.order : index,
+        }));
+        setFlashcards(normalizedCards);
+        setFileName(data.fileName || "");
+        setDifficulty(data.difficulty || "");
+        setTopicFocus(data.topicFocus || "");
+      }
     }
   }, []);
 
@@ -140,13 +163,13 @@ export const StudyFlashcardsView = () => {
 
   if (flashcards.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br bg-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br bg-[#efeee5] flex items-center justify-center">
         <div className="text-center">
           <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Flashcards Found</h2>
+          <h2 className="text-2xl font-bold text-[#1F2937] mb-2">No Flashcards Found</h2>
           <p className="text-gray-600 mb-6">Generate flashcards to start studying</p>
           <Link href="/flashcards/generate">
-            <Button className="bg-[#8056c3] hover:bg-[#6232ae]">
+            <Button className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
               Generate Flashcards
             </Button>
           </Link>
@@ -159,9 +182,9 @@ export const StudyFlashcardsView = () => {
   const currentStatus = cardStatuses[currentIndex] || "new";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br bg-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br bg-[#efeee5]">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
+      <header className="bg-[#f9f8f0] backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -169,7 +192,7 @@ export const StudyFlashcardsView = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-100"
+                  className="flex items-center space-x-2 text-[#1F2937] hover:text-[#1F2937] transition-colors hover:bg-gray-200"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-sm font-medium">Library</span>
@@ -177,11 +200,11 @@ export const StudyFlashcardsView = () => {
               </Link>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-sm">
+                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] rounded-xl shadow-sm">
                   <Brain className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">Study Flashcards</h1>
+                  <h1 className="text-lg font-bold text-[#1F2937]">Study Flashcards</h1>
                   {fileName && <p className="text-xs text-gray-500">{fileName}</p>}
                 </div>
               </div>
@@ -192,7 +215,7 @@ export const StudyFlashcardsView = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleShuffle}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-gray-300 text-[#1F2937] hover:bg-gray-100"
               >
                 <Shuffle className="w-4 h-4" />
                 <span>Shuffle</span>
@@ -203,7 +226,7 @@ export const StudyFlashcardsView = () => {
                   size="sm"
                   onClick={handleSaveSet}
                   disabled={saving}
-                  className="flex items-center space-x-2 bg-[#8056c3] hover:bg-[#6232ae]"
+                  className="flex items-center space-x-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                 >
                   <Save className="w-4 h-4" />
                   <span>{saving ? "Saving..." : "Save Set"}</span>
@@ -215,28 +238,28 @@ export const StudyFlashcardsView = () => {
       </header>
 
       {/* Progress Bar */}
-      <div className="bg-white border-b border-gray-200 py-4">
+      <div className="bg-[#f9f8f0] border-b border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-6 text-sm">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="font-medium text-gray-700">Known: {knownCount}</span>
+                <span className="font-medium text-[#1F2937]">Known: {knownCount}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span className="font-medium text-gray-700">Learning: {learningCount}</span>
+                <span className="font-medium text-[#1F2937]">Learning: {learningCount}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                <span className="font-medium text-gray-700">New: {newCount}</span>
+                <span className="font-medium text-[#1F2937]">New: {newCount}</span>
               </div>
             </div>
-            <span className="text-sm font-bold text-gray-700">{Math.round(progress)}% Complete</span>
+            <span className="text-sm font-bold text-[#1F2937]">{Math.round(progress)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-[#7C3AED] to-[#06B6D4] h-3 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -248,7 +271,7 @@ export const StudyFlashcardsView = () => {
         <div className="max-w-4xl mx-auto">
           {/* Card Counter */}
           <div className="text-center mb-8">
-            <p className="text-lg font-semibold text-gray-700">
+            <p className="text-lg font-semibold text-[#1F2937]">
               Card {currentIndex + 1} of {flashcards.length}
             </p>
           </div>
@@ -286,13 +309,13 @@ export const StudyFlashcardsView = () => {
                 onClick={handlePrevious}
                 disabled={currentIndex === 0}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-gray-300 text-[#1F2937] hover:bg-gray-100"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>
               </Button>
 
-              <div className="text-sm text-gray-600">
+              <div className="text-sm">
                 {currentStatus === "known" && (
                   <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">
                     Marked as Known
@@ -309,7 +332,7 @@ export const StudyFlashcardsView = () => {
                 onClick={handleNext}
                 disabled={currentIndex === flashcards.length - 1}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-gray-300 text-[#1F2937] hover:bg-gray-100"
               >
                 <span>Next</span>
                 <ChevronRight className="w-4 h-4" />

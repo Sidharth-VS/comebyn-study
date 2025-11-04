@@ -158,8 +158,8 @@ const HomeView = ( { userId }: { userId: string } ) => {
         </div>
 
         {loading && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="text-center py-12 bg-[#efeee5]">
+            <div className="w-16 h-16 bg-[#efeee5] rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
               <BookOpen className="w-8 h-8 text-blue-500" />
             </div>
             <h3 className="text-lg font-medium text-[#1F2937] mb-2">Loading study rooms...</h3>

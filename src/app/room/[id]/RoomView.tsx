@@ -131,7 +131,7 @@ export const RoomView = ({ userId }: { userId: string }) => {
 
   if (!room || !files || userId === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#E8DED1] via-[#E5DAC9] to-[#DDD3C1] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br bg-[#efeee5] flex items-center justify-center">
       <div className="flex flex-col items-center text-center">
         <h1 className="text-2xl font-bold text-[#1F2937] mb-2">
           Fetching room resources
@@ -317,9 +317,6 @@ export const RoomView = ({ userId }: { userId: string }) => {
                         className="pl-8 w-48"
                       />
                     </div>
-                    <Button variant="outline" size="sm" className="border-[#7C3AED] text-[#7C3AED] hover:bg-[#7C3AED] hover:text-white">
-                      <Pin className="w-4 h-4" />
-                    </Button>
                   </div>
                 </div>
               </CardHeader>
@@ -409,24 +406,23 @@ export const RoomView = ({ userId }: { userId: string }) => {
                             <Download className="w-4 h-4" />
                           )}
                         </Button>
-                        <Button size="sm" onClick={handleFileUpload} className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
-                          <Upload className="w-4 h-4" />
-                        </Button>
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-64">
-                      <div className="space-y-3">
+                  <CardContent className="p-0">
+                    <ScrollArea className="h-64 w-full">
+                      <div className="space-y-2 p-4">
                         {files.length > 0 && files.map((file) => (
-                          <div key={file.id} className="flex items-start space-x-3 p-2 rounded border border-gray-200">
-                            <div className="flex-shrink-0 mt-1">{getFileIcon('pdf')}</div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-[#1F2937] truncate">{file.name}</p>
-                              <p className="text-sm text-gray-600">{file.size} MB</p>
+                          <div key={file.id} className="flex items-center justify-between p-2 rounded border border-gray-200 hover:bg-gray-50">
+                            <div className="flex items-center space-x-2 flex-1 min-w-0">
+                              <div className="flex-shrink-0">{getFileIcon('pdf')}</div>
+                              <div className="min-w-0">
+                                <p className="flex flex-2 max-w-45 text-sm font-medium text-[#1F2937] truncate">{file.name}</p>
+                                <p className="text-xs text-gray-600">{file.size} MB</p>
+                              </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => downloadPdf(file.id)} className="text-[#06B6D4] hover:text-[#0891B2]">
-                              <Download className="w-3 h-3" />
+                            <Button size="sm" onClick={() => downloadPdf(file.id)} className="flex-shrink-0 ml-2 bg-[#06B6D4] hover:bg-[#0891B2] text-white">
+                              <Download className="w-4 h-4" />
                             </Button>
                           </div>
                         ))}

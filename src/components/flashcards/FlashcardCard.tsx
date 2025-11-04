@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { RotateCw } from "lucide-react";
 
@@ -15,10 +15,16 @@ export type FlashcardData = {
 interface FlashcardCardProps {
   flashcard: FlashcardData;
   showTypeIndicator?: boolean;
+  resetFlip?: boolean;
 }
 
-export const FlashcardCard = ({ flashcard, showTypeIndicator = true }: FlashcardCardProps) => {
+export const FlashcardCard = ({ flashcard, showTypeIndicator = true, resetFlip }: FlashcardCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
+
+  // Reset flip state when flashcard changes
+  useEffect(() => {
+    setIsFlipped(false);
+  }, [flashcard]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);

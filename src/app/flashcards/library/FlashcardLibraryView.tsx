@@ -57,15 +57,16 @@ export const FlashcardLibraryView = () => {
     try {
       const result = await getFlashcardSet(setId);
       if (result.success && result.set) {
-        // Store in sessionStorage for study view
-        sessionStorage.setItem('generatedFlashcards', JSON.stringify({
+        // Store in sessionStorage using dynamic key for multiple set support
+        sessionStorage.setItem(`flashcardSet_${setId}`, JSON.stringify({
           flashcards: result.set.flashcards,
           fileName: result.set.sourcePdf || result.set.title,
           difficulty: result.set.difficulty,
           topicFocus: result.set.topicFocus
         }));
         sessionStorage.setItem('currentFlashcardSetId', setId);
-        router.push('/flashcards/study');
+        // Navigate with setId parameter
+        router.push(`/flashcards/study?setId=${setId}`);
       }
     } catch (err) {
       console.error("Failed to load flashcard set:", err);
@@ -82,9 +83,9 @@ export const FlashcardLibraryView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br bg-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br bg-[#efeee5]">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
+      <header className="bg-[#f9f8f0] backdrop-blur-lg border-b border-gray-200/80 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -92,7 +93,7 @@ export const FlashcardLibraryView = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors hover:bg-gray-100"
+                  className="flex items-center space-x-2 text-[#1F2937] hover:text-[#1F2937] transition-colors hover:bg-gray-200"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span className="text-sm font-medium">Back</span>
@@ -100,17 +101,17 @@ export const FlashcardLibraryView = () => {
               </Link>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center space-x-3">
-                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-sm">
+                <div className="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] rounded-xl shadow-sm">
                   <Brain className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-gray-900">Flashcard Library</h1>
+                  <h1 className="text-lg font-bold text-[#1F2937]">Flashcard Library</h1>
                 </div>
               </div>
             </div>
 
             <Link href="/flashcards/generate">
-              <Button className="flex items-center space-x-2 bg-[#8056c3] hover:bg-[#6232ae]">
+              <Button className="flex items-center space-x-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
                 <Plus className="w-4 h-4" />
                 <span>Create New Set</span>
               </Button>
@@ -124,10 +125,10 @@ export const FlashcardLibraryView = () => {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-6 border border-gray-100">
-              <BookOpen className="w-10 h-10 text-blue-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f9f8f0] rounded-2xl shadow-lg mb-6 border border-[#06B6D4]">
+              <BookOpen className="w-10 h-10 text-[#7C3AED]" />
             </div>
-            <h1 className="text-4xl md:text-3xl font-bold text-gray-900 mb-4 bg-gradient-to-br from-gray-900 to-gray-700 bg-clip-text">
+            <h1 className="text-4xl md:text-3xl font-bold text-[#1F2937] mb-4">
               Your Flashcard Sets
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-medium">
@@ -139,7 +140,7 @@ export const FlashcardLibraryView = () => {
           {loading && (
             <div className="flex justify-center items-center py-12">
               <svg
-                className="animate-spin h-10 w-10 text-blue-600"
+                className="animate-spin h-10 w-10 text-[#7C3AED]"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -170,12 +171,12 @@ export const FlashcardLibraryView = () => {
 
           {/* Empty State */}
           {!loading && !error && flashcardSets.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div className="text-center py-12 bg-[#f9f8f0] rounded-2xl shadow-lg border border-gray-100">
               <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No Flashcard Sets Yet</h3>
+              <h3 className="text-xl font-bold text-[#1F2937] mb-2">No Flashcard Sets Yet</h3>
               <p className="text-gray-600 mb-6">Create your first flashcard set to start studying</p>
               <Link href="/flashcards/generate">
-                <Button className="bg-[#8056c3] hover:bg-[#6232ae]">
+                <Button className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Flashcard Set
                 </Button>
@@ -189,10 +190,10 @@ export const FlashcardLibraryView = () => {
               {flashcardSets.map((set) => (
                 <div
                   key={set.id}
-                  className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200 overflow-hidden"
+                  className="bg-[#f9f8f0] rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200 overflow-hidden"
                 >
                   {/* Card Header */}
-                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-6">
+                  <div className="bg-gradient-to-br from-[#7C3AED] to-[#06B6D4] p-6">
                     <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">
                       {set.title}
                     </h3>
@@ -231,7 +232,7 @@ export const FlashcardLibraryView = () => {
                     <div className="flex items-center space-x-2 pt-4 border-t border-gray-100">
                       <Button
                         onClick={() => handleStudy(set.id)}
-                        className="flex-1 bg-[#8056c3] hover:bg-[#6232ae] text-white"
+                        className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
                         Study
